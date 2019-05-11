@@ -1,0 +1,39 @@
+// ALL CODE WRITTEN BY ISAAC GILES and NATHAN REINHART
+// This File Combines All Classes And Functions In A Logical Way To Clearly Organise The Game
+
+import java.awt.AWTException;
+import java.awt.Robot;
+Robot MouseMover;
+
+int screenX = 2000;
+int screenY;
+
+// Setup Function
+public void setup() {
+  
+  fullScreen(P2D);
+  //size(500, 500);
+  frameRate(60);
+  
+  // setup variables
+  screenY = height;
+  
+  try { // MouseMover.MouseMove(x, y);
+    MouseMover = new Robot();
+  } catch (AWTException e) {
+    println("Robot Class Not Supported");
+    exit();
+  }
+  
+}
+
+
+// Draw Function
+public void draw() {
+  
+  background(250);
+  
+  drawGrid();
+  displayTerrain();
+  
+}
