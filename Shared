@@ -1,0 +1,43 @@
+// This File Contains All Functions That Are Shared Between All Files
+
+
+// Mouse Pressed Function
+public void mousePressed() {
+  
+  if (!placingBlock) {
+    
+    if (checkTerrainCollisions(int(mouseX), int(mouseY)) == "none") {
+      placingBlock = true;
+      for (int i = 0; i < TerrainBlocks.length; i++) {
+        if (TerrainBlocks[i] == null) {
+          snapMouseToGrid();
+          TerrainBlocks[i] = new TerrainBlock(mouseX, mouseY);
+          blockBeingPlaced = i;
+          break;
+        }
+      }
+    }
+    
+  } else {
+    
+    snapMouseToGrid();
+    if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions()) {
+      placingBlock = false;
+      TerrainBlocks[blockBeingPlaced].place = true;
+    }
+    
+  }
+  
+}
+
+
+// Mouse Released Function
+public void mouseReleased() {
+  
+}
+
+
+// Mouse Moved Function
+public void mouseMoved() {
+  //TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions();
+}
