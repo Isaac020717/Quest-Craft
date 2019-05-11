@@ -1,0 +1,257 @@
+// This File Contains All Classes, Functions And Variables That Are Related To Terrain And Construction
+
+// VARIABLES //
+TerrainBlock[] TerrainBlocks = new TerrainBlock[50];
+
+boolean placingBlock = false;
+int blockBeingPlaced = 0;
+
+
+int gridSpacing = 20;
+int[] gridLinesX;
+int[] gridLinesY;
+
+
+
+// CLASSES //
+class TerrainBlock {
+  
+  int xPos;
+  int yPos;
+  int xSize;
+  int ySize;
+  
+  int cols = 4; int rows = 2;
+  int[][] corners = new int[cols][rows];
+  
+  int[] interiorGridX  = new int[0];
+  int[] interiorGridY  = new int[0];
+  
+  boolean placing = true;
+  boolean place = false;
+  boolean placed = false;
+  
+  String type = "grass";
+  PImage texture;
+  
+  
+  TerrainBlock(int cornerX, int cornerY) {
+    corners[0][0] = cornerX;
+    corners[0][1] = cornerY;
+  }
+  
+  
+  // Block Placing Function
+  void placeBlock() {
+    
+    if (place) {
+      
+      place = false;
+      placing = false;
+      placed = true;
+      
+      // calculate the corner positions
+      CalculateCorners();
+      // make border for collisions
+      CalculateInteriorGrid();
+      // calculate position and size of block
+      CalculatePosSize();
+      
+    }
+    
+    fill(6, 223, 240);
+    noStroke();
+    
+    if (placing) {
+      rectMode(CORNERS);
+      rect(corners[0][0], corners[0][1], mouseX, mouseY, 5);
+    } else {
+      rectMode(CENTER);
+      rect(xPos, yPos, xSize, ySize, 5);
+    }
+    
+    // this draws the interior grid
+    //for (int i = 0; i < interiorGridX.length; i++) {
+    //  noFill(); rectMode(CENTER); stroke(0); strokeWeight(5);
+    //  rect(interiorGridX[i], interiorGridY[i], gridSpacing, gridSpacing);
+    //}
+    
+  }
+  
+  
+  // Function To Check For Collisions Between Block And Other Blocks
+  boolean CheckPlacementCollisions() {
+    
+    boolean returnValue = false;
+    CalculateTempPosSize();
+    for (int i = 0; i < TerrainBlocks.length; i++) {
+      if (TerrainBlocks[i] != this && TerrainBlocks[i] != null) {
+        if ( (abs(TerrainBlocks[i].xPos - xPos) < ((TerrainBlocks[i].xSize/2) + (xSize/2)) ) && (abs(TerrainBlocks[i].yPos - yPos) < ((TerrainBlocks[i].ySize/2) + (ySize/2)) ) ) {
+          returnValue = true;
+        }
+      }
+    }
+    
+    return returnValue;
+    
+  }
+  
+  
+  // Function For Calculating The Size and Position of A Terrain Block
+  void CalculateTempPosSize() {
+    xSize = abs(corners[0][0] - mouseX);
+    ySize = abs(corners[0][1] - mouseY);
+    // set x position
+    if (mouseX > corners[0][0]) {
+      xPos = (corners[0][0] + (xSize/2));
+    } else {
+      xPos = (corners[0][0] - (xSize/2));
+    }
+    // set y position
+    if (mouseY > corners[0][1]) {
+      yPos = (corners[0][1] + (ySize/2));
+    } else {
+      yPos = (corners[0][1] - (ySize/2));
+    }
+  }
+  // Function For Calculating The Size and Position of A Terrain Block
+  void CalculatePosSize() {
+    xSize = abs(corners[0][0] - corners[2][0]);
+    ySize = abs(corners[0][1] - corners[2][1]);
+    xPos = (corners[0][0] + (xSize/2));
+    yPos = (corners[0][1] - (ySize/2));
+  }
+  
+  
+  // Function To Find Where The Corners Should Be
+  void CalculateCorners() {
+    if (mouseX > corners[0][0]) {
+      corners[2][0] = mouseX;
+    } else {
+      corners[2][0] = corners[0][0];
+      corners[0][0] = mouseX;
+    }
+    if (mouseY < corners[0][1]) {
+      corners[2][1] = mouseY;
+    } else {
+      corners[2][1] = corners[0][1];
+      corners[0][1] = mouseY;
+    }
+    // top right corner
+    corners[1][0] = corners[2][0];
+    corners[1][1] = corners[0][1];
+    // bottom left corner
+    corners[3][0] = corners[0][0];
+    corners[3][1] = corners[2][1];
+  }
+  
+  
+  // Function To Determine Which Grid Squares Are Inside Of The Terrain Block
+  void CalculateInteriorGrid() {
+    
+    for (int i = 0; i<gridLinesX.length; i++) {
+      for (int j = 0; j<gridLinesY.length; j++) {
+        int gridBoxX = gridLinesX[i] + (gridSpacing/2);
+        int gridBoxY = gridLinesY[j] + (gridSpacing/2);
+        if (gridBoxX > corners[0][0] && gridBoxX < corners[2][0]) {
+          if (gridBoxY < corners[0][1] && gridBoxY > corners[2][1]) {
+            interiorGridX = expand(interiorGridX, (interiorGridX.length + 1));
+            interiorGridY = expand(interiorGridY, (interiorGridY.length + 1));
+            interiorGridX[interiorGridX.length - 1] = gridBoxX;
+            interiorGridY[interiorGridY.length - 1] = gridBoxY;
+          }
+        }
+      }
+    }
+    
+  }
+  
+}
+
+
+
+// FUNCTIONS //
+
+
+// Grid Drawing Function
+public void drawGrid () {
+  
+  int minx = ( (width/2) - (screenX/2) );
+  int maxx = ( (width/2) + (screenX/2) );
+  
+  int miny = 0;
+  int maxy = height;
+  
+  
+  gridLinesX = new int[screenX/gridSpacing];
+  for (int i = 0; i<gridLinesX.length; i++) {
+    gridLinesX[i] = gridSpacing*(i+1);
+    stroke(50); strokeWeight(1);
+    line(gridLinesX[i], miny, gridLinesX[i], maxy);
+  }
+  
+  gridLinesY = new int[screenY/gridSpacing];
+  for (int i = 0; i<gridLinesY.length; i++) {
+    gridLinesY[i] = gridSpacing*(i+1);
+    stroke(50); strokeWeight(1);
+    line(minx, gridLinesY[i], maxx, gridLinesY[i]);
+  }
+  
+}
+
+
+// Function Snaps Mouse To Grid
+public void snapMouseToGrid() {
+  
+  int closestX = 0;
+  for (int i = 1; i<gridLinesX.length; i++) {
+   if ( abs(mouseX - gridLinesX[i]) < abs(mouseX - gridLinesX[closestX]) ) {
+     closestX = i;
+   }
+  }
+  
+  int closestY = 0;
+  for (int i = 1; i<gridLinesY.length; i++) {
+   if ( abs(mouseY - gridLinesY[i]) < abs(mouseY - gridLinesY[closestY]) ) {
+     closestY = i;
+   }
+  }
+  
+  // move mouse
+  MouseMover.mouseMove(gridLinesX[closestX], gridLinesY[closestY]);
+  mouseX = gridLinesX[closestX]; mouseY = gridLinesY[closestY];
+  
+}
+
+
+// When Called This Function Displays All Terrain
+public void displayTerrain() {
+  for (int i = 0; i < TerrainBlocks.length; i++) {
+    if (TerrainBlocks[i] != null) {
+      TerrainBlocks[i].placeBlock();
+    }
+  }
+}
+
+
+// This Function 
+public String checkTerrainCollisions(int xValue, int yValue) {
+  String returnValue = "none";
+  
+  // Check For Collision With A Terrain Block
+  for (int i = 0; i < TerrainBlocks.length; i++) {
+    if (TerrainBlocks[i] != null) {
+      if (TerrainBlocks[i].placed) {
+        if ( (xValue >= TerrainBlocks[i].corners[0][0]) && (xValue <= TerrainBlocks[i].corners[2][0]) ) {
+          if ( (yValue <= TerrainBlocks[i].corners[0][1]) && (yValue >= TerrainBlocks[i].corners[2][1]) ) {
+            // we have a collision 
+            returnValue = TerrainBlocks[i].type;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  return returnValue;
+}
