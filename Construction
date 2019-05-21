@@ -3,10 +3,21 @@
 // VARIABLES //
 TerrainBlock[] TerrainBlocks = new TerrainBlock[50];
 
+// Global Terrain Variables
+boolean constructionMode = true; // Only true for now!! Change Later!
+  boolean blockPlacingMode = false;
 boolean placingBlock = false;
 int blockBeingPlaced = 0;
+String selectedTexture;
 
+// Terrain Buttons
+ArrayList<Button> ConstructionButtons = new ArrayList<Button>();
+boolean ConstructionButtonsInstantiated = false;
 
+// Materials
+PImage dirtTexture, grassTexture;
+
+// Grid Variables
 int gridSpacing = 20;
 int[] gridLinesX;
 int[] gridLinesY;
@@ -31,13 +42,14 @@ class TerrainBlock {
   boolean place = false;
   boolean placed = false;
   
-  String type = "grass";
+  String type;
   PImage texture;
   
   
-  TerrainBlock(int cornerX, int cornerY) {
+  TerrainBlock(int cornerX, int cornerY, String t) {
     corners[0][0] = cornerX;
     corners[0][1] = cornerY;
+    type = t;
   }
   
   
@@ -70,11 +82,15 @@ class TerrainBlock {
       rect(xPos, yPos, xSize, ySize, 5);
     }
     
-    // this draws the interior grid
-    //for (int i = 0; i < interiorGridX.length; i++) {
-    //  noFill(); rectMode(CENTER); stroke(0); strokeWeight(5);
-    //  rect(interiorGridX[i], interiorGridY[i], gridSpacing, gridSpacing);
-    //}
+    //this draws the texture
+    for (int i = 0; i < interiorGridX.length; i++) {
+      imageMode(CENTER);
+      if (type == "dirt") {
+        image(dirtTexture, interiorGridX[i] + currentOffset, interiorGridY[i], gridSpacing, gridSpacing);
+      } else if (type == "grass") {
+        image(grassTexture, interiorGridX[i] + currentOffset, interiorGridY[i], gridSpacing, gridSpacing);
+      }
+    }
     
   }
   
@@ -151,8 +167,8 @@ class TerrainBlock {
     
     for (int i = 0; i<gridLinesX.length; i++) {
       for (int j = 0; j<gridLinesY.length; j++) {
-        int gridBoxX = gridLinesX[i] + (gridSpacing/2);
-        int gridBoxY = gridLinesY[j] + (gridSpacing/2);
+        int gridBoxX = gridLinesX[i] + (gridSpacing/2) + currentOffset;
+        int gridBoxY = gridLinesY[j] + (gridSpacing/2) + currentOffset;
         if (gridBoxX > corners[0][0] && gridBoxX < corners[2][0]) {
           if (gridBoxY < corners[0][1] && gridBoxY > corners[2][1]) {
             interiorGridX = expand(interiorGridX, (interiorGridX.length + 1));
@@ -173,6 +189,13 @@ class TerrainBlock {
 // FUNCTIONS //
 
 
+// Function For Loading Material Image Files
+public void loadMaterials() {
+  dirtTexture = loadImage("dirtTexture2.jpg");
+  grassTexture = loadImage("grassTexture.jpg");
+}
+
+
 // Grid Drawing Function
 public void drawGrid () {
   
@@ -185,7 +208,7 @@ public void drawGrid () {
   
   gridLinesX = new int[screenX/gridSpacing];
   for (int i = 0; i<gridLinesX.length; i++) {
-    gridLinesX[i] = gridSpacing*(i+1);
+    gridLinesX[i] = minx + (gridSpacing*(i+1)) + currentOffset;
     stroke(50); strokeWeight(1);
     line(gridLinesX[i], miny, gridLinesX[i], maxy);
   }
@@ -194,7 +217,7 @@ public void drawGrid () {
   for (int i = 0; i<gridLinesY.length; i++) {
     gridLinesY[i] = gridSpacing*(i+1);
     stroke(50); strokeWeight(1);
-    line(minx, gridLinesY[i], maxx, gridLinesY[i]);
+    line(minx + currentOffset, gridLinesY[i], maxx + currentOffset, gridLinesY[i]);
   }
   
 }
