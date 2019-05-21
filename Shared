@@ -4,21 +4,42 @@
 // Mouse Pressed Function
 public void mousePressed() {
   
-  if (!placingBlock) {
-    
-    if (checkTerrainCollisions(int(mouseX), int(mouseY)) == "none") {
-      placingBlock = true;
-      for (int i = 0; i < TerrainBlocks.length; i++) {
-        if (TerrainBlocks[i] == null) {
-          snapMouseToGrid();
-          TerrainBlocks[i] = new TerrainBlock(mouseX, mouseY);
-          blockBeingPlaced = i;
+  // check if user is clicking a button
+  boolean clickingButton = false;
+  for (Button b : ConstructionButtons) {
+    if ( mouseX > (b.buttonX - (b.buttonXS/2)) && mouseX < (b.buttonX + (b.buttonXS/2)) ) {
+      if ( mouseY > (b.buttonY - (b.buttonYS/2)) && mouseY < (b.buttonY + (b.buttonYS/2)) ) {
+        if (!b.selected && b.active) {
+          b.Click();
+          clickingButton = true;
+          break;
+        } else if (b.active) {
+          b.UnClick();
+          clickingButton = true;
           break;
         }
       }
     }
+  }
+  
+  if (blockPlacingMode && !placingBlock) {
     
-  } else {
+    // if user is not clicking on a button, then draw terrain
+    if (!clickingButton) {
+      if (checkTerrainCollisions(int(mouseX), int(mouseY)) == "none") {
+        placingBlock = true;
+        for (int i = 0; i < TerrainBlocks.length; i++) {
+          if (TerrainBlocks[i] == null) {
+            snapMouseToGrid();
+            TerrainBlocks[i] = new TerrainBlock(mouseX, mouseY, selectedTexture);
+            blockBeingPlaced = i;
+            break;
+          }
+        }
+      }
+    }
+    
+  } else if (blockPlacingMode) {
     
     snapMouseToGrid();
     if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions()) {
@@ -39,5 +60,37 @@ public void mouseReleased() {
 
 // Mouse Moved Function
 public void mouseMoved() {
-  //TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions();
+  
+}
+
+
+public void keyPressed() {
+  
+  if (key == CODED) {
+    
+    if (keyCode == RIGHT && !placingBlock) {
+      
+      if (constructionMode) {
+        currentOffset -= 40;
+      }
+      
+    }
+    if (keyCode == LEFT && !placingBlock) {
+      
+      if (constructionMode) {
+        currentOffset += 40;
+      }
+      
+    }
+    
+  } else if (key == ENTER) {
+    
+    for (Button b : ConstructionButtons) {
+      if (b.selected == true) {
+        b.UnClick();
+      }
+    }
+    
+  }
+  
 }
