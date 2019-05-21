@@ -1,0 +1,175 @@
+PImage TerrainButton, ReturnToBuildMenu, DirtIcon, GrassIcon;
+boolean showReturnToBuildMenu = false;
+
+
+// Button Class
+class Button {
+  
+  String ButtonName;
+  
+  int buttonX, buttonY, buttonXS, buttonYS;
+  String ClickFunction, UnClickFunction;
+  PImage buttonImg;
+  
+  boolean active, hover, selected, hide;
+  int hoverSizeX, hoverSizeY;
+  
+  // Class Declaration
+  Button(int x, int y, int xs, int ys, boolean act, String cf, String uf, PImage img, String bname) {
+    buttonX = x;
+    buttonY = y;
+    buttonXS = xs;
+    hoverSizeX = buttonXS + 10;
+    buttonYS = ys;
+    hoverSizeY = buttonYS + 10;
+    active = act;
+    ClickFunction = cf;
+    UnClickFunction = uf;
+    buttonImg = img;
+    ButtonName = bname;
+  }
+  
+  
+  // function for displaying the button
+  void Display() {
+    
+    if ( mouseX > (buttonX - (buttonXS/2)) && mouseX < (buttonX + (buttonXS/2)) ) {
+      if ( mouseY > (buttonY - (buttonYS/2)) && mouseY < (buttonY + (buttonYS/2)) ) {
+        hover = true;
+      } else {
+        hover = false;
+      }
+    } else {
+      hover = false;
+    }
+    
+    // draw button
+    imageMode(CENTER);
+    if (!hover && !hide) {
+      image(buttonImg, buttonX, buttonY, buttonXS, buttonYS);
+    } else if (!hide) {
+      image(buttonImg, buttonX, buttonY, hoverSizeX, hoverSizeY);
+    }
+    
+    // show this label if a button is in use
+    if (selected) {
+      method(ClickFunction);
+    }
+    
+  }
+  
+  // function for when user is clicking button
+  void Click() {
+    selected = true;
+    method(ClickFunction);
+  }
+  // function for when user is clicking button
+  void UnClick() {
+    selected = false;
+    method(UnClickFunction);
+  }
+  
+}
+
+
+
+
+// BUTTON FUNCTIONS //
+
+// Terrain Button Functions
+public void TerrainButtonClick() {
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+      b.active = true;
+      b.hide = false;
+    }
+  }
+}
+public void TerrainButtonUnClick() {
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+      b.active = false;
+      b.hide = true;
+    }
+  }
+}
+
+// Dirt Button Functions
+public void DirtIconClick() {
+  blockPlacingMode = true;
+  selectedTexture = "dirt";
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+      b.active = false;
+      b.hide = true;
+    }
+  }
+  showReturnToBuildMenu = true;
+}
+public void DirtIconUnClick() {
+  blockPlacingMode = false;
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Terrain") {
+      b.active = true;
+      b.hide = false;
+    }
+  }
+  showReturnToBuildMenu = false;
+}
+
+// Grass Button Functions
+public void GrassIconClick() {
+  blockPlacingMode = true;
+  selectedTexture = "grass";
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+      b.active = false;
+      b.hide = true;
+    }
+  }
+  showReturnToBuildMenu = true;
+}
+public void GrassIconUnClick() {
+  blockPlacingMode = false;
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Terrain") {
+      b.active = true;
+      b.hide = false;
+    }
+  }
+  showReturnToBuildMenu = false;
+}
+
+
+
+
+// FUNCTIONS FOR SWITCHING BETWEEN SCREENS //
+
+// Function For Displaying All UI For Construction
+public void displayConstructionUI() {
+  
+  // instantiating UI classes, and loading images
+  if (!ConstructionButtonsInstantiated) {
+    ReturnToBuildMenu = loadImage("ReturnToBuildMenu.png");
+    TerrainButton = loadImage("PlaceTerrain.png");
+    ConstructionButtons.add( new Button(75, (height-75), 100, 100, true, "TerrainButtonClick", "TerrainButtonUnClick", TerrainButton, "Terrain") );
+    DirtIcon = loadImage("DirtIcon.png");
+    ConstructionButtons.add( new Button(75, (height-200), 70, 70, false, "DirtIconClick", "DirtIconUnClick", DirtIcon, "Dirt") );
+    GrassIcon = loadImage("GrassIcon.png");
+    ConstructionButtons.add( new Button(75, (height-300), 70, 70, false, "GrassIconClick", "GrassIconUnClick", GrassIcon, "Grass") );
+    ConstructionButtonsInstantiated = true;
+  }
+  
+  // displaying active buttons
+  for (Button b : ConstructionButtons) {
+    if (b.active) {
+      b.Display();
+    }
+  }
+  
+  // displaying non class based UI
+  if (showReturnToBuildMenu) {
+    image(ReturnToBuildMenu, width/2, height-70);
+  }
+  
+}
