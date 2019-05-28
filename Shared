@@ -7,7 +7,7 @@ public void mousePressed() {
   // check if user is clicking a button
   boolean clickingButton = false;
   for (Button b : ConstructionButtons) {
-    if ( mouseX > (b.buttonX - (b.buttonXS/2)) && mouseX < (b.buttonX + (b.buttonXS/2)) ) {
+    if ( mouseX > ((b.buttonX + currentOffset) - (b.buttonXS/2)) && mouseX < ((b.buttonX + currentOffset) + (b.buttonXS/2)) ) {
       if ( mouseY > (b.buttonY - (b.buttonYS/2)) && mouseY < (b.buttonY + (b.buttonYS/2)) ) {
         if (!b.selected && b.active) {
           b.Click();
@@ -22,7 +22,7 @@ public void mousePressed() {
     }
   }
   
-  if (blockPlacingMode && !placingBlock) {
+  if (blockPlacingMode && !placingBlock) { // BLOCK PLACING MODE (start)
     
     // if user is not clicking on a button, then draw terrain
     if (!clickingButton) {
@@ -39,12 +39,29 @@ public void mousePressed() {
       }
     }
     
-  } else if (blockPlacingMode) {
+  } else if (blockPlacingMode) { // BLOCK PLACING MODE (end)
     
     snapMouseToGrid();
     if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions()) {
       placingBlock = false;
       TerrainBlocks[blockBeingPlaced].place = true;
+    }
+    
+  } else if (blockMovingMode) { // BLOCK MOVING MODE
+    
+    if (!clickingButton && !movingBlock) {
+      blockBeingPlaced = checkTerrainSelection( int(mouseX), int(mouseY) );
+      if (blockBeingPlaced != 1000) {
+        TerrainBlocks[blockBeingPlaced].moving = true;
+        TerrainBlocks[blockBeingPlaced].placed = false;
+        movingBlock = true;
+      }
+    } else if (!clickingButton && movingBlock) {
+      
+      snapMouseToGrid();
+      TerrainBlocks[blockBeingPlaced].place = true;
+      movingBlock = false;
+      
     }
     
   }
@@ -71,14 +88,14 @@ public void keyPressed() {
     if (keyCode == RIGHT && !placingBlock) {
       
       if (constructionMode) {
-        currentOffset -= 40;
+        negativeOffset = true;
       }
       
     }
     if (keyCode == LEFT && !placingBlock) {
       
       if (constructionMode) {
-        currentOffset += 40;
+        positiveOffset = true;
       }
       
     }
@@ -89,6 +106,31 @@ public void keyPressed() {
       if (b.selected == true) {
         b.UnClick();
       }
+    }
+    
+  }
+  
+}
+
+
+
+public void keyReleased() {
+  
+  if (key == CODED) {
+    
+    if (keyCode == RIGHT) {
+      
+      if (constructionMode) {
+        negativeOffset = false;
+      }
+      
+    }
+    if (keyCode == LEFT) {
+      
+      if (constructionMode) {
+        positiveOffset = false;
+      }
+      
     }
     
   }
