@@ -6,8 +6,10 @@ import java.awt.Robot;
 Robot MouseMover;
 
 int currentOffset = 0;
+int offsetIncr = 5;
+boolean positiveOffset, negativeOffset;
 int screenX = 2000;
-int screenY;
+int screenY = 800;
 
 // Setup Function
 public void setup() {
@@ -17,7 +19,6 @@ public void setup() {
   frameRate(60);
   
   // setup variables
-  screenY = height;
   
   // load images
   loadMaterials();
@@ -38,10 +39,28 @@ public void draw() {
   
   background(250);
   
+  applyOffset();
   if (constructionMode) {
     drawGrid();
     displayTerrain();
     displayConstructionUI();
   }
+  popMatrix();
+  
+}
+
+
+// function for applying offset when user pans left and right
+void applyOffset() {
+  
+  if (positiveOffset) {
+    currentOffset += offsetIncr;
+  }
+  if (negativeOffset) {
+    currentOffset -= offsetIncr;
+  }
+  
+  pushMatrix();
+  translate(currentOffset, 0);
   
 }
