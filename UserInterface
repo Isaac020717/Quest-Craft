@@ -1,4 +1,4 @@
-PImage TerrainButton, ReturnToBuildMenu, DirtIcon, GrassIcon;
+PImage TerrainButton, MoveTerrainButton, ReturnToBuildMenu, DirtIcon, GrassIcon;
 boolean showReturnToBuildMenu = false;
 
 
@@ -7,7 +7,7 @@ class Button {
   
   String ButtonName;
   
-  int buttonX, buttonY, buttonXS, buttonYS;
+  int standardX, buttonX, buttonY, buttonXS, buttonYS;
   String ClickFunction, UnClickFunction;
   PImage buttonImg;
   
@@ -16,6 +16,7 @@ class Button {
   
   // Class Declaration
   Button(int x, int y, int xs, int ys, boolean act, String cf, String uf, PImage img, String bname) {
+    standardX = x;
     buttonX = x;
     buttonY = y;
     buttonXS = xs;
@@ -33,7 +34,11 @@ class Button {
   // function for displaying the button
   void Display() {
     
-    if ( mouseX > (buttonX - (buttonXS/2)) && mouseX < (buttonX + (buttonXS/2)) ) {
+    // change position of button based on camera offset
+    buttonX = standardX - currentOffset;
+    
+    // check to see if mouse is over the button
+    if ( mouseX > ((buttonX + currentOffset) - (buttonXS/2)) && mouseX < ((buttonX+currentOffset) + (buttonXS/2)) ) {
       if ( mouseY > (buttonY - (buttonYS/2)) && mouseY < (buttonY + (buttonYS/2)) ) {
         hover = true;
       } else {
@@ -46,7 +51,7 @@ class Button {
     // draw button
     imageMode(CENTER);
     if (!hover && !hide) {
-      image(buttonImg, buttonX, buttonY, buttonXS, buttonYS);
+      image(buttonImg, buttonX, buttonY);
     } else if (!hide) {
       image(buttonImg, buttonX, buttonY, hoverSizeX, hoverSizeY);
     }
@@ -94,12 +99,33 @@ public void TerrainButtonUnClick() {
   }
 }
 
+// Move Terrain Button Functions
+public void MoveTerrainButtonClick() {
+  blockMovingMode = true;
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "MoveTerrain" || b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+      b.active = false;
+      b.hide = true;
+    }
+  }
+  showReturnToBuildMenu = true;
+}
+public void MoveTerrainButtonUnClick() {
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "MoveTerrain" || b.ButtonName == "Terrain") {
+      b.active = true;
+      b.hide = false;
+    }
+  }
+  showReturnToBuildMenu = false;
+}
+
 // Dirt Button Functions
 public void DirtIconClick() {
   blockPlacingMode = true;
   selectedTexture = "dirt";
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "MoveTerrain") {
       b.active = false;
       b.hide = true;
     }
@@ -109,7 +135,7 @@ public void DirtIconClick() {
 public void DirtIconUnClick() {
   blockPlacingMode = false;
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain") {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "MoveTerrain") {
       b.active = true;
       b.hide = false;
     }
@@ -122,7 +148,7 @@ public void GrassIconClick() {
   blockPlacingMode = true;
   selectedTexture = "grass";
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "MoveTerrain") {
       b.active = false;
       b.hide = true;
     }
@@ -132,7 +158,7 @@ public void GrassIconClick() {
 public void GrassIconUnClick() {
   blockPlacingMode = false;
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain") {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "MoveTerrain") {
       b.active = true;
       b.hide = false;
     }
@@ -151,12 +177,19 @@ public void displayConstructionUI() {
   // instantiating UI classes, and loading images
   if (!ConstructionButtonsInstantiated) {
     ReturnToBuildMenu = loadImage("ReturnToBuildMenu.png");
+    
     TerrainButton = loadImage("PlaceTerrain.png");
     ConstructionButtons.add( new Button(75, (height-75), 100, 100, true, "TerrainButtonClick", "TerrainButtonUnClick", TerrainButton, "Terrain") );
+    
+    MoveTerrainButton = loadImage("MoveTerrain.png");
+    ConstructionButtons.add( new Button(200, (height-75), 100, 100, true, "MoveTerrainButtonClick", "MoveTerrainButtonUnClick", MoveTerrainButton, "MoveTerrain") );
+    
     DirtIcon = loadImage("DirtIcon.png");
     ConstructionButtons.add( new Button(75, (height-200), 70, 70, false, "DirtIconClick", "DirtIconUnClick", DirtIcon, "Dirt") );
+    
     GrassIcon = loadImage("GrassIcon.png");
     ConstructionButtons.add( new Button(75, (height-300), 70, 70, false, "GrassIconClick", "GrassIconUnClick", GrassIcon, "Grass") );
+    
     ConstructionButtonsInstantiated = true;
   }
   
@@ -169,7 +202,8 @@ public void displayConstructionUI() {
   
   // displaying non class based UI
   if (showReturnToBuildMenu) {
-    image(ReturnToBuildMenu, width/2, height-70);
+    imageMode(CENTER);
+    image(ReturnToBuildMenu, width/2-currentOffset, height-70);
   }
   
 }
