@@ -1,7 +1,7 @@
 // This File Contains All Classes, Functions And Variables That Are Related To Terrain And Construction
 
 // VARIABLES //
-TerrainBlock[] TerrainBlocks = new TerrainBlock[50];
+TerrainBlock[] TerrainBlocks = new TerrainBlock[100];
 
 // Global Terrain Variables
 boolean constructionMode = true; // Only true for now!! Change Later!
@@ -9,6 +9,7 @@ boolean constructionMode = true; // Only true for now!! Change Later!
     boolean placingBlock = false;
   boolean blockMovingMode = false;
     boolean movingBlock = false;
+  boolean blockDeletingMode = false;
 int blockBeingPlaced = 0;
 String selectedTexture;
 
@@ -76,26 +77,11 @@ class TerrainBlock {
         
       } else {
         
-        int moveAmountX = int( abs(xPos - (mouseX+currentOffset)) );
-        int moveAmountY = int( abs(yPos - mouseY) );
-        
-        // change corner positions
-        for (int c = 0; c<cols; c++) {
-          for (int r = 0; r<cols; r++) {
-            if (r == 0) {
-              corners[c][r] = corners[c][r] + moveAmountX;
-            } else if (r == 1) {
-              corners[c][r] = corners[c][r] + moveAmountY;
-            }
-          }
-        }
-        
-        // change centre position
-        xPos = xPos + moveAmountX;
-        yPos = yPos + moveAmountY;
+        // Calculate Position and Size of Block
+        CalculateMovementPosSize();
         
         // Calculate Interior Grid Of The Terrain Block
-        CalculateInteriorGrid();
+        ReCalculateInteriorGrid();
         
         // reset variable
         moving = false;
@@ -112,7 +98,7 @@ class TerrainBlock {
       rect(corners[0][0], corners[0][1], mouseX-currentOffset, mouseY, 3);
     } else if (moving) {
       rectMode(CENTER);
-      rect(mouseX, mouseY, xSize, ySize, 3);
+      rect(mouseX-currentOffset, mouseY, xSize, ySize, 3);
     } else {
       rectMode(CENTER);
       rect(xPos, yPos, xSize, ySize, 3);
@@ -134,10 +120,16 @@ class TerrainBlock {
   
   
   // Function To Check For Collisions Between Block And Other Blocks
-  boolean CheckPlacementCollisions() {
+  boolean CheckPlacementCollisions(boolean adjust) {
     
     boolean returnValue = false;
-    CalculateTempPosSize();
+    
+    if (!adjust) {
+      CalculateTempPosSize();
+    } else {
+      CalculateMovementPosSize();
+    }
+    
     for (int i = 0; i < TerrainBlocks.length; i++) {
       if (TerrainBlocks[i] != this && TerrainBlocks[i] != null) {
         if ( (abs(TerrainBlocks[i].xPos - xPos) < ((TerrainBlocks[i].xSize/2) + (xSize/2)) ) && (abs(TerrainBlocks[i].yPos - yPos) < ((TerrainBlocks[i].ySize/2) + (ySize/2)) ) ) {
@@ -175,6 +167,26 @@ class TerrainBlock {
     xPos = (corners[0][0] + (xSize/2));
     yPos = (corners[0][1] - (ySize/2));
   }
+  // Function For Calculating The Size and Position of A Terrain Block That Is Bein Move/Rearranged
+  void CalculateMovementPosSize() {
+    int moveAmountX = int( ((mouseX-currentOffset) - xPos) );
+    int moveAmountY = int( (mouseY - yPos) );
+    
+    // change corner positions
+    for (int c = 0; c<cols; c++) {
+      for (int r = 0; r<cols; r++) {
+        if (r == 0) {
+          corners[c][r] = corners[c][r] + moveAmountX;
+        } else if (r == 1) {
+          corners[c][r] = corners[c][r] + moveAmountY;
+        }
+      }
+    }
+    
+    // change centre position
+    xPos = xPos + moveAmountX;
+    yPos = yPos + moveAmountY;
+  }
   
   
   // Function To Find Where The Corners Should Be
@@ -202,6 +214,29 @@ class TerrainBlock {
   
   // Function To Determine Which Grid Squares Are Inside Of The Terrain Block
   void CalculateInteriorGrid() {
+    
+    for (int i = 0; i<gridLinesX.length; i++) {
+      for (int j = 0; j<gridLinesY.length; j++) {
+        int gridBoxX = gridLinesX[i] + (gridSpacing/2);
+        int gridBoxY = gridLinesY[j] + (gridSpacing/2);
+        if (gridBoxX > corners[0][0] && gridBoxX < corners[2][0]) {
+          if (gridBoxY < corners[0][1] && gridBoxY > corners[2][1]) {
+            interiorGridX = expand(interiorGridX, (interiorGridX.length + 1));
+            interiorGridY = expand(interiorGridY, (interiorGridY.length + 1));
+            interiorGridX[interiorGridX.length - 1] = gridBoxX;
+            interiorGridY[interiorGridY.length - 1] = gridBoxY;
+          }
+        }
+      }
+    }
+    
+  }
+  
+  // Function To Determine Which Grid Squares Are Inside Of The Terrain Block
+  void ReCalculateInteriorGrid() {
+    
+    interiorGridX = expand(interiorGridX, 0);
+    interiorGridY = expand(interiorGridY, 0);
     
     for (int i = 0; i<gridLinesX.length; i++) {
       for (int j = 0; j<gridLinesY.length; j++) {
@@ -275,25 +310,63 @@ public void drawGrid () {
 
 
 // Function Snaps Mouse To Grid
-public void snapMouseToGrid() {
+public void snapMouseToGrid(boolean adjust) {
   
   int closestX = 0;
+  int offsetX = 0;
   for (int i = 1; i<gridLinesX.length; i++) {
-   if ( abs(mouseX - (gridLinesX[i]+currentOffset)) < abs(mouseX - (gridLinesX[closestX]+currentOffset)) ) {
-     closestX = i;
-   }
+    if (adjust) { // adjustment may be required
+      
+      if ( (TerrainBlocks[blockBeingPlaced].xSize / gridSpacing)%2 != 0) {
+        if ( abs(mouseX - ( gridLinesX[i]+currentOffset + (gridSpacing/2) )) < abs(mouseX - ( gridLinesX[closestX]+currentOffset + (gridSpacing/2) )) ) {
+          closestX = i;
+          offsetX = gridSpacing/2;
+        }
+      } else {
+        if ( abs(mouseX - (gridLinesX[i]+currentOffset)) < abs(mouseX - (gridLinesX[closestX]+currentOffset)) ) {
+          closestX = i;
+        }
+      }
+      
+    } else { // adjustment is not required
+      
+      if ( abs(mouseX - (gridLinesX[i]+currentOffset)) < abs(mouseX - (gridLinesX[closestX]+currentOffset)) ) {
+        closestX = i;
+      }
+      
+    }
   }
+  
   
   int closestY = 0;
+  int offsetY = 0;
   for (int i = 1; i<gridLinesY.length; i++) {
-   if ( abs(mouseY - gridLinesY[i]) < abs(mouseY - gridLinesY[closestY]) ) {
-     closestY = i;
-   }
+    if (adjust) { // adjustment may be required
+      
+      if ( (TerrainBlocks[blockBeingPlaced].ySize / gridSpacing)%2 != 0) {
+        if ( abs(mouseY - ( gridLinesY[i] + (gridSpacing/2) )) < abs(mouseY - ( gridLinesY[closestY] + (gridSpacing/2) )) ) {
+          closestY = i;
+          offsetY = gridSpacing/2;
+        }
+      } else {
+        if ( abs(mouseY - (gridLinesY[i])) < abs(mouseY - (gridLinesY[closestY])) ) {
+          closestY = i;
+        }
+      }
+      
+    } else { // adjustment is not required
+      
+      if ( abs(mouseY - gridLinesY[i]) < abs(mouseY - gridLinesY[closestY]) ) {
+        closestY = i;
+      }
+      
+    }
   }
   
+  
   // move mouse
-  MouseMover.mouseMove(gridLinesX[closestX]+currentOffset, gridLinesY[closestY]);
-  mouseX = gridLinesX[closestX]+currentOffset; mouseY = gridLinesY[closestY];
+  MouseMover.mouseMove( (gridLinesX[closestX] + currentOffset + offsetX), (gridLinesY[closestY] + offsetY) );
+  mouseX = (gridLinesX[closestX] + currentOffset + offsetX);  mouseY = (gridLinesY[closestY] + offsetY);
   
 }
 
