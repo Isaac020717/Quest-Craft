@@ -1,24 +1,30 @@
-// ALL CODE WRITTEN BY ISAAC GILES and NATHAN REINHART
+// ALL CODE WRITTEN BY ISAAC GILES and NATHAN REINERT
 // This File Combines All Classes And Functions In A Logical Way To Clearly Organise The Game
 
 import java.awt.AWTException;
 import java.awt.Robot;
 Robot MouseMover;
 
+int currentOffset = 0;
+int offsetIncr = 5;
+boolean positiveOffset, negativeOffset;
 int screenX = 2000;
-int screenY;
+int screenY = 1600;
 
 // Setup Function
 public void setup() {
   
+  // basic setup
   fullScreen(P2D);
-  //size(500, 500);
   frameRate(60);
   
   // setup variables
-  screenY = height;
   
-  try { // MouseMover.MouseMove(x, y);
+  // load images
+  loadMaterials();
+  
+  // setup mouse mover
+  try {
     MouseMover = new Robot();
   } catch (AWTException e) {
     println("Robot Class Not Supported");
@@ -33,7 +39,29 @@ public void draw() {
   
   background(250);
   
-  drawGrid();
-  displayTerrain();
+  applyOffset();
+  if (constructionMode) {
+    drawGrid();
+    displayTerrain();
+    displayConstructionUI();
+    highlights();
+  }
+  popMatrix();
+  
+}
+
+
+// function for applying offset when user pans left and right
+void applyOffset() {
+  
+  if (positiveOffset) {
+    currentOffset += offsetIncr;
+  }
+  if (negativeOffset) {
+    currentOffset -= offsetIncr;
+  }
+  
+  pushMatrix();
+  translate(currentOffset, 0);
   
 }
