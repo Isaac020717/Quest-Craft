@@ -425,3 +425,67 @@ public int checkTerrainSelection(int xValue, int yValue) {
   
   return returnValue;
 }
+
+
+///////////////////////not done
+//flags
+class Flag {
+  int flagX, flagY;
+  int fWidth = 26;
+  int fHeight = 52;
+  boolean placing = true;
+  boolean place = false;
+  boolean placed = false;
+  boolean moving = false;
+  String flagType;
+
+  Flag(String fT) {
+    flagType = fT;
+  }
+
+  void placeFlag() {
+    if (place) {
+
+      place = false;
+      placing = false;
+      placed = true;
+
+      flagX = mouseX - currentOffset;
+      flagY = mouseY;
+
+
+      // reset variable
+      moving = false;
+    }
+    fill(6, 223, 240);
+    noStroke();
+
+    if (placing) {
+      if (flagType == "red") {
+        //draw red flag
+      } else if (flagType == "green") {
+        imageMode(CENTER);
+        image(gFlag, mouseX - currentOffset, mouseY);
+      }
+      
+    } else if (moving) {
+      if (flagType == "red") {
+        //draw red flag
+        
+      } else if (flagType == "green") {
+        imageMode(CENTER);
+        image(gFlag, mouseX - currentOffset, mouseY);
+      }
+    }
+
+    //this draws the texture
+    if (!moving && placed) {
+      imageMode(CENTER);
+      if (flagType == "red") {
+        //image(dirtTexture, interiorGridX[i], interiorGridY[i]);
+      } else if (flagType == "green") {
+        image(gFlag, flagX, flagY);
+      }
+    }
+  }
+}
