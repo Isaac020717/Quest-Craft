@@ -6,15 +6,63 @@ import java.awt.Robot;
 Robot MouseMover;
 
 int currentOffset = 0;
-int offsetIncr = 5;
+int offsetIncr = 4;
 boolean positiveOffset, negativeOffset;
 int screenX = 2000;
 int screenY = 800;
+int startX = 600;
+int startY = 400;
+
+boolean keyrel = false;
+
+int gameState = 0; // 0 = construction, 1 = playing, 2 = death
+
 
 // Setup Function
 public void setup() {
   
-  // basic setup
+  //////////////////////////////////////////////////Player Setup
+  background(255, 255, 255);
+  noFill();
+  front1 = loadImage("FrontFacingPlayer.png");
+  front2 = loadImage("FrontFacingPlayer(2).png");
+  right1 = loadImage("RightFacingPlayer1.png");
+  right2 = loadImage("RightFacingPlayer2.png");
+  right3 = loadImage("RightFacingPlayer3.png");
+  right4 = loadImage("RightFacingPlayer4.png");
+  left1 = loadImage("LeftFacingPlayer1.png");
+  left2 = loadImage("LeftFacingPlayer2.png");
+  left3 = loadImage("LeftFacingPlayer3.png");
+  left4 = loadImage("LeftFacingPlayer4.png");
+  jump1 = loadImage("PlayerJump1.png");
+  jump2 = loadImage("PlayerJump2.png");
+
+  rightsequence[0] = right1;
+  rightsequence[1] = right2;
+  rightsequence[2] = right3;
+  rightsequence[3] = right4;
+
+  leftsequence[0] = left1;
+  leftsequence[1] = left2;
+  leftsequence[2] = left3;
+  leftsequence[3] = left4;
+
+  player.Pos = new PVector(startX, startY);
+  player.Vel = new PVector(0, 0);
+  player.Acc = new PVector(0, 0);
+
+  player.Acc.set(0, 0.5);
+
+  for (int i = 0; i < 4; i++) {
+    rightsequence[i].resize(59, 75);
+    leftsequence[i].resize(59, 75);
+  }
+
+  jump1.resize(59, 67);
+  jump2.resize(59, 75);
+  
+  
+  //////////////////basic setup//////////////////////////////////
   fullScreen(P2D);
   frameRate(60);
   
@@ -30,23 +78,6 @@ public void setup() {
     println("Robot Class Not Supported");
     exit();
   }
-  
-}
-
-
-// Draw Function
-public void draw() {
-  
-  background(250);
-  
-  applyOffset();
-  if (constructionMode) {
-    drawGrid();
-    displayTerrain();
-    displayConstructionUI();
-  }
-  popMatrix();
-  
 }
 
 
@@ -63,4 +94,42 @@ void applyOffset() {
   pushMatrix();
   translate(currentOffset, 0);
   
+}
+
+// Draw Function
+public void draw() {
+
+  background(250);
+  applyOffset();
+  
+  if (gameState == 0) {
+    if (constructionMode) {
+      drawGrid();
+      displayTerrain();
+      displayConstructionUI();
+    }
+  }
+  /////////////////////////////////////to start press p
+if (blockPlacingMode){
+  if (keyPressed){
+    if (key == 'p'){
+     blockPlacingMode = false; 
+    }
+  }
+}
+  if (gameState == 1) {
+    text(player.Pos.x, player.Pos.x, 30);
+    text(currentOffset, player.Pos.x, 60);
+    //drawGrid();
+    displayTerrain();
+    player.collisionDetection();
+    playerMovement();
+    player.pan();
+    if (keyPressed){
+     if (key == 'q'){
+      gameState = 0; 
+     }
+    }
+  }
+  popMatrix();
 }
