@@ -18,7 +18,7 @@ ArrayList<Button> ConstructionButtons = new ArrayList<Button>();
 boolean ConstructionButtonsInstantiated = false;
 
 // Materials
-PImage dirtTexture, grassTexture;
+PImage dirtTexture, grassTexture, lavaTexture;
 
 // Grid Variables
 int gridSpacing = 20;
@@ -101,7 +101,7 @@ class TerrainBlock {
       rect(mouseX-currentOffset, mouseY, xSize, ySize, 3);
     } else {
       rectMode(CENTER);
-      rect(xPos, yPos, xSize, ySize, 3);
+      rect(xPos, yPos, xSize, ySize);
     }
     
     //this draws the texture
@@ -112,6 +112,8 @@ class TerrainBlock {
           image(dirtTexture, interiorGridX[i], interiorGridY[i]);
         } else if (type == "grass") {
           image(grassTexture, interiorGridX[i], interiorGridY[i]);
+        } else if (type == "lava") {
+          image(lavaTexture, interiorGridX[i], interiorGridY[i]);
         }
       }
     }
@@ -268,6 +270,8 @@ public void loadMaterials() {
   dirtTexture.resize(gridSpacing, gridSpacing);
   grassTexture = loadImage("grassTexture.jpg");
   grassTexture.resize(gridSpacing, gridSpacing);
+  lavaTexture = loadImage("lavaTexture.jpg");
+  lavaTexture.resize(gridSpacing, gridSpacing);
 }
 
 
