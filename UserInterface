@@ -1,4 +1,4 @@
-PImage TerrainButton, MoveTerrainButton, DeleteTerrainButton, ReturnToBuildMenu, DirtIcon, GrassIcon;
+PImage TerrainButton, MoveTerrainButton, DeleteTerrainButton, ReturnToBuildMenu, DirtIcon, GrassIcon, LavaIcon;
 boolean showReturnToBuildMenu = false;
 
 
@@ -84,7 +84,7 @@ class Button {
 // Terrain Button Functions
 public void TerrainButtonClick() {
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "Lava") {
       b.active = true;
       b.hide = false;
     }
@@ -92,7 +92,7 @@ public void TerrainButtonClick() {
 }
 public void TerrainButtonUnClick() {
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
+    if (b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "Lava") {
       b.active = false;
       b.hide = true;
     }
@@ -103,10 +103,8 @@ public void TerrainButtonUnClick() {
 public void MoveTerrainButtonClick() {
   blockMovingMode = true;
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain" || b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
       b.active = false;
       b.hide = true;
-    }
   }
   showReturnToBuildMenu = true;
 }
@@ -125,10 +123,8 @@ public void MoveTerrainButtonUnClick() {
 public void DeleteTerrainButtonClick() {
   blockDeletingMode = true;
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain" || b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass") {
       b.active = false;
       b.hide = true;
-    }
   }
   showReturnToBuildMenu = true;
 }
@@ -148,10 +144,8 @@ public void DirtIconClick() {
   blockPlacingMode = true;
   selectedTexture = "dirt";
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain") {
       b.active = false;
       b.hide = true;
-    }
   }
   showReturnToBuildMenu = true;
 }
@@ -171,14 +165,33 @@ public void GrassIconClick() {
   blockPlacingMode = true;
   selectedTexture = "grass";
   for (Button b : ConstructionButtons) {
-    if (b.ButtonName == "Terrain" || b.ButtonName == "Dirt" || b.ButtonName == "Grass" || b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain") {
       b.active = false;
       b.hide = true;
-    }
   }
   showReturnToBuildMenu = true;
 }
 public void GrassIconUnClick() {
+  blockPlacingMode = false;
+  for (Button b : ConstructionButtons) {
+    if (b.ButtonName == "Terrain" || b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain") {
+      b.active = true;
+      b.hide = false;
+    }
+  }
+  showReturnToBuildMenu = false;
+}
+
+// Lava Button Functions
+public void LavaIconClick() {
+  blockPlacingMode = true;
+  selectedTexture = "lava";
+  for (Button b : ConstructionButtons) {
+      b.active = false;
+      b.hide = true;
+  }
+  showReturnToBuildMenu = true;
+}
+public void LavaIconUnClick() {
   blockPlacingMode = false;
   for (Button b : ConstructionButtons) {
     if (b.ButtonName == "Terrain" || b.ButtonName == "MoveTerrain" || b.ButtonName == "DeleteTerrain") {
@@ -215,6 +228,9 @@ public void displayConstructionUI() {
     
     GrassIcon = loadImage("GrassIcon.png");
     ConstructionButtons.add( new Button(75, (height-300), 70, 70, false, "GrassIconClick", "GrassIconUnClick", GrassIcon, "Grass") );
+    
+    LavaIcon = loadImage("LavaIcon.png");
+    ConstructionButtons.add( new Button(75, (height-400), 70, 70, false, "LavaIconClick", "LavaIconUnClick", LavaIcon, "Lava") );
     
     ConstructionButtonsInstantiated = true;
   }
