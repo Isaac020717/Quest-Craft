@@ -41,6 +41,19 @@ class Character {
     strokeWeight(1);
   }
 
+  void pan() {
+    if (abs((0 - currentOffset) - Pos.x) < 20) {
+      positiveOffset = true;
+    } else {
+      positiveOffset = false;
+    }
+    if (abs((width - currentOffset) - Pos.x) < 70){
+      negativeOffset = true;
+    } else {
+      negativeOffset = false;
+    }
+  }
+
   void bouncePlayer() {
     imageMode(CORNERS);
     bcount += 1;
@@ -117,12 +130,18 @@ class Character {
           //println("botcoll");
           Pos.y = TerrainBlocks[i].corners[2][1] - 75;
           Vel.y = 0;
+          if (TerrainBlocks[i].type == "lava"){
+           dead = true; 
+          }
         } 
 
         //Top collisions
         if (Pos.y > TerrainBlocks[i].corners[2][1] && Pos.y < TerrainBlocks[i].corners[1][1] && Pos.y > TerrainBlocks[i].corners[1][1] - 10 && Pos.x < TerrainBlocks[i].corners[1][0] && Pos.x + 59 > TerrainBlocks[i].corners[0][0]) {
           Pos.y = TerrainBlocks[i].corners[1][1];
           Vel.y = 0;
+          if (TerrainBlocks[i].type == "lava"){
+           dead = true; 
+          }
         }
 
         //Left Side Collisions
@@ -131,6 +150,9 @@ class Character {
           //println("Left Collision"); 
           lscoll = true;
           Pos.x = TerrainBlocks[i].corners[1][0];
+          if (TerrainBlocks[i].type == "lava"){
+           dead = true; 
+          }
 
           //Right Side Collision
         } else {
@@ -140,6 +162,9 @@ class Character {
           //println("Right Collision");
           rscoll = true;
           Pos.x = TerrainBlocks[i].corners[0][0] - 59;
+          if (TerrainBlocks[i].type == "lava"){
+           dead = true; 
+          }
         } else {
           rscoll = false;
         }
@@ -168,8 +193,8 @@ class Character {
 void playerMovement() {
   //player.drawHitbox();
   player.Pos.add(player.Vel);
-  if (player.Vel.y == gridSpacing - 1){
-   player.Vel.y = gridSpacing - 2; 
+  if (player.Vel.y == gridSpacing - 1) {
+    player.Vel.y = gridSpacing - 2;
   }
 
   if (player.Pos.y > height - 77) {
@@ -177,7 +202,9 @@ void playerMovement() {
     //player.jumping = false;
     //player.Pos.y = height - 77;
 
-    println("dead");
+    if (player.dead){
+     println("dead"); 
+    }
   }
 
   if (player.Vel.y > 0) {
@@ -207,11 +234,11 @@ void playerMovement() {
   if (!player.movingLeft && !player.movingRight) { 
     /*
     if (player.Pos.y == height - 77) {
-      player.Vel.x = 0;
-      player.bouncePlayer();
-      //println("NOT MOVING");
-    }
-    */
+     player.Vel.x = 0;
+     player.bouncePlayer();
+     //println("NOT MOVING");
+     }
+     */
     if (player.botcoll) {
       player.bouncePlayer();
     }
