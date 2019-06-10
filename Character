@@ -42,12 +42,12 @@ class Character {
   }
 
   void pan() {
-    if (abs((0 - currentOffset) - Pos.x) < 20) {
+    if (abs((0 - currentOffset) - Pos.x) < 50) {
       positiveOffset = true;
     } else {
       positiveOffset = false;
     }
-    if (abs((width - currentOffset) - Pos.x) < 70){
+    if (abs((width - currentOffset) - Pos.x) < 100){
       negativeOffset = true;
     } else {
       negativeOffset = false;
@@ -132,6 +132,7 @@ class Character {
           Vel.y = 0;
           if (TerrainBlocks[i].type == "lava"){
            dead = true; 
+           endtext = "died";
           }
         } 
 
@@ -141,6 +142,7 @@ class Character {
           Vel.y = 0;
           if (TerrainBlocks[i].type == "lava"){
            dead = true; 
+           endtext = "died";
           }
         }
 
@@ -152,6 +154,7 @@ class Character {
           Pos.x = TerrainBlocks[i].corners[1][0];
           if (TerrainBlocks[i].type == "lava"){
            dead = true; 
+           endtext = "died";
           }
 
           //Right Side Collision
@@ -164,6 +167,7 @@ class Character {
           Pos.x = TerrainBlocks[i].corners[0][0] - 59;
           if (TerrainBlocks[i].type == "lava"){
            dead = true; 
+           endtext = "died";
           }
         } else {
           rscoll = false;
@@ -173,6 +177,14 @@ class Character {
     if (!botcoll) {
       Vel.add(Acc);
     }
+    
+    if (Pos.x > 850 && Pos.x < 950 && Pos.y > 630 && Pos.y < 770){
+     dead = true; 
+     endtext = "won";
+     timeSinceGo = millis() - time;
+    }
+    
+    
   }
 }
 
@@ -202,9 +214,8 @@ void playerMovement() {
     //player.jumping = false;
     //player.Pos.y = height - 77;
 
-    if (player.dead){
-     println("dead"); 
-    }
+    player.dead = true;
+    endtext = "died";
   }
 
   if (player.Vel.y > 0) {
