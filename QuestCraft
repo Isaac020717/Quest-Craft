@@ -10,6 +10,12 @@ int offsetIncr = 5;
 boolean positiveOffset, negativeOffset;
 int screenX = 2000;
 int screenY = 1600;
+int startX = 600;
+int startY = 400;
+
+int gameState = 0; // 0 = construction, 1 = playing, 2 = death
+
+
 
 // Setup Function
 public void setup() {
@@ -22,6 +28,8 @@ public void setup() {
   
   // load images
   loadMaterials();
+  // load character
+  setUpCharacter();
   
   // setup mouse mover
   try {
@@ -34,21 +42,47 @@ public void setup() {
 }
 
 
+
 // Draw Function
 public void draw() {
   
   background(250);
-  
   applyOffset();
-  if (constructionMode) {
-    drawGrid();
+  
+  if (gameState == 0) {
+    if (constructionMode) {
+      drawGrid();
+      displayTerrain();
+      displayConstructionUI();
+      highlights();
+    }
+  } else if (gameState == 1) {
+    text(player.Pos.x, player.Pos.x, 30);
+    text(currentOffset, player.Pos.x, 60);
     displayTerrain();
-    displayConstructionUI();
-    highlights();
+    player.collisionDetection();
+    playerMovement();
+    player.pan();
+    if (keyPressed){
+     if (key == 'q'){
+      gameState = 0;
+     }
+    }
   }
   popMatrix();
   
+  
+  // Press 'p' to start
+  if (blockPlacingMode){
+    if (keyPressed){
+      if (key == 'p'){
+       blockPlacingMode = false; 
+      }
+    }
+  }
+  
 }
+
 
 
 // function for applying offset when user pans left and right
