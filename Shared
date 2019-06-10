@@ -1,6 +1,7 @@
 // This File Contains All Functions That Are Shared Between All Files
 
 
+
 // Mouse Pressed Function
 public void mousePressed() {
 
@@ -22,6 +23,7 @@ public void mousePressed() {
     }
   }
 
+
   if (blockPlacingMode && !placingBlock) { // BLOCK PLACING MODE (start)
 
     // if user is not clicking on a button, then draw terrain
@@ -30,7 +32,7 @@ public void mousePressed() {
         placingBlock = true;
         for (int i = 0; i < TerrainBlocks.length; i++) {
           if (TerrainBlocks[i] == null) {
-            snapMouseToGrid();
+            snapMouseToGrid(false);
             TerrainBlocks[i] = new TerrainBlock(mouseX, mouseY, selectedTexture);
             blockBeingPlaced = i;
             break;
@@ -40,10 +42,13 @@ public void mousePressed() {
     }
   } else if (blockPlacingMode) { // BLOCK PLACING MODE (end)
 
-    snapMouseToGrid();
-    if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions()) {
-      placingBlock = false;
-      TerrainBlocks[blockBeingPlaced].place = true;
+    snapMouseToGrid(false);
+    TerrainBlocks[blockBeingPlaced].CalculateTempPosSize();
+    if (TerrainBlocks[blockBeingPlaced].xSize > 0 && TerrainBlocks[blockBeingPlaced].ySize > 0) {
+      if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(false)) {
+        placingBlock = false;
+        TerrainBlocks[blockBeingPlaced].place = true;
+      }
     }
   } else if (blockMovingMode) { // BLOCK MOVING MODE
 
@@ -56,9 +61,99 @@ public void mousePressed() {
       }
     } else if (!clickingButton && movingBlock) {
 
-      snapMouseToGrid();
+      snapMouseToGrid(true);
       TerrainBlocks[blockBeingPlaced].place = true;
       movingBlock = false;
+    } 
+  } else if (blockDeletingMode) { // BLOCK DELETING MODE
+    
+    if (!clickingButton) {
+      int blockToDelete = checkTerrainSelection( int(mouseX), int(mouseY) );
+      if (blockToDelete != 1000) {
+        TerrainBlocks[blockToDelete] = null;
+      }
+    }
+    
+  }
+
+  //quit
+  if (gameState == 2) {
+    if (mouseX > 20 && mouseX < 163) {
+      if (mouseY > 20 && mouseY < 78) {
+        gamequit = true;
+      }
+    }
+  }
+
+  //play
+  if (gameState == 1) {
+    if (mouseX > 20 && mouseX < 163) {
+      if (mouseY > 20 && mouseY < 78) {
+        gameplay = true;
+        timeSinceGo = millis();
+        timeSinceGo -= time;
+      }
+    }
+  }
+
+
+  //////game state buttons
+
+  if (gameState == 0) {
+
+    if (mouseX > 280 && mouseX < 402) {
+      if (mouseY > 164 && mouseY < 194) {
+        gameState = 1;
+      }
+    }
+  }
+
+  if (gameState == 1) {
+
+    if (mouseX > 520 && mouseX < 580) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 1;
+      }
+    }
+
+    if (mouseX > 610 && mouseX < 670) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 2;
+      }
+    }
+
+    if (mouseX > 700 && mouseX < 760) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 3;
+      }
+    }
+  }
+
+  if (gameState == 3) {
+    l = 1;
+    if (mouseX > 580 && mouseX < 800) {/////////////////////////////play again
+      if (mouseY > 480 && mouseY < 520) {
+        gameState = 2;
+        player.Pos.x = startX;
+        player.Pos.y = startY;
+        player.Vel.y = 0;
+        constructionMode = true;
+        blockPlacingMode = false;
+      }
+    }
+
+    if (mouseX > 200 && mouseX < 300) { //////////////////////////////reset
+      if (mouseY > 670 && mouseY < 700) {
+        for (int i = 0; i < TerrainBlocks.length; i ++) {
+          TerrainBlocks[i] = null;
+        }
+        gameState = 0;
+        player.Pos.x = startX;
+        player.Pos.y = startY;
+        player.Vel.y = 0;
+        constructionMode = true;
+        blockPlacingMode = false;
+      }
     }
   }
 }
