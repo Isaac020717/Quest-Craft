@@ -169,7 +169,7 @@ class TerrainBlock {
     xPos = (corners[0][0] + (xSize/2));
     yPos = (corners[0][1] - (ySize/2));
   }
-  // Function For Calculating The Size and Position of A Terrain Block That Is Bein Move/Rearranged
+  // Function For Calculating The Size and Position of A Terrain Block That Is Being Moved/Rearranged
   void CalculateMovementPosSize() {
     int moveAmountX = int( ((mouseX-currentOffset) - xPos) );
     int moveAmountY = int( (mouseY - yPos) );
