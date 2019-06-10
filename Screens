@@ -1,0 +1,161 @@
+PImage startS;
+PImage endS;
+PImage background1;
+PImage background2;
+PImage background3;
+PImage quitB, playB;
+int backgroundChosen;
+
+public void drawBackground() {
+
+  if (backgroundChosen == 1) {
+    background1.resize(width, height);
+    background(background1);
+  }
+
+  if (backgroundChosen == 2) {
+    background2.resize(width, height);
+    background(background2);
+  }
+
+  if (backgroundChosen == 3) {
+    background3.resize(width, height);
+    background(background3);
+  }
+
+  strokeWeight(7);
+  stroke(255, 252, 35);
+  noFill();
+  imageMode(CORNERS);
+
+  background1.resize(60, 48);
+  image(background1, 520, 40);
+  rect(520, 40, 60, 48, 5);
+
+  background2.resize(60, 48);
+  image(background2, 610, 40);
+  rect(610, 40, 60, 48, 5);
+
+  background3.resize(60, 48);
+  image(background3, 700, 40);
+  rect(700, 40, 60, 48, 5);
+}
+
+public void loadScreens() {
+  startS = loadImage("StartScreen(1).png");
+  endS = loadImage("gameScreen3(1).png");
+  background1 = loadImage("background1(1).png");
+  background2 = loadImage("background2(1).png");
+  background3 = loadImage("background3(1).png");
+  quitB = loadImage("quitbutton.png");
+  quitB.resize(143, 52);
+  playB = loadImage("playbutton.png");
+  playB.resize(143, 52);
+}
+public void displayScreen() {
+  if (gameState == 0) {
+    background(startS);
+  }
+
+
+
+
+
+  if (gameState == 1) {
+    temp_score = 0;
+    if (constructionMode) {
+      //drawBackground();
+      drawGrid();
+      displayTerrain();      
+      displayConstructionUI();
+      ellipse(900, 700, 50, 70);
+
+      if (!blockPlacingMode) {
+        imageMode(CENTER);
+        image(playB, 91 - currentOffset, 46);
+        if (mouseX > 20 && mouseX < 163) {
+          if (mouseY > 20 && mouseY < 78) {
+            //quitB.resize(154, 56);
+            image(playB, 91 - currentOffset, 46, 154, 56);
+          }
+        }
+      }
+      if (keyPressed) {
+        if (key == 'p') {
+          gameState = 2;
+        }
+      }
+      if (gameplay) {
+        gameState = 2;
+        gameplay = false;
+      }
+    }
+
+    ///////////////////////////////////////////////to start press p
+    if (blockPlacingMode) {
+      if (keyPressed) {
+        if (key == 'p') {
+          blockPlacingMode = false; 
+          gameState = 2;
+        }
+      }
+    }
+  }
+
+
+
+
+
+
+  if (gameState == 2) {
+    temp_score = 0;
+    //text(player.Pos.x, player.Pos.x, 30);
+    //text(currentOffset, player.Pos.x, 60);
+    //drawGrid();
+    displayTerrain();
+    
+    temp_score = millis() - timeSinceGo;
+    
+    ellipse(900, 700, 50, 70);
+    
+    imageMode(CENTER);
+    image(quitB, 91 - currentOffset, 46);
+    if (mouseX > 20 && mouseX < 163) {
+      if (mouseY > 20 && mouseY < 78) {
+        //quitB.resize(154, 56);
+        image(quitB, 91 - currentOffset, 46, 154, 56);
+      }
+    }  
+ 
+    player.collisionDetection();
+    playerMovement();
+    player.pan();
+    if (keyPressed) {
+      if (key == 'q') {
+        gameState = 1;
+        gamequit = false;
+      }
+    }
+    if (gamequit) {
+      gameState = 1;
+      gamequit = false;
+    }
+  } 
+
+
+  if (gameState == 3) {
+    if (l == 1){
+      l=2;
+      score = temp_score;
+      strscore[0] = "" + temp_score;
+      if (int(strscore[0]) < int(highscore[0])){
+      saveStrings("scores.txt", strscore);
+      }
+    }
+    
+    
+    background(endS);
+    constructionMode = false;
+    text(endtext, 490, 230);
+  }
+}
