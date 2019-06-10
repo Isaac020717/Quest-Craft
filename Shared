@@ -1,5 +1,7 @@
 // This File Contains All Functions That Are Shared Between All Files
 
+boolean keyrel = false;
+
 
 // Mouse Pressed Function
 public void mousePressed() {
@@ -42,9 +44,12 @@ public void mousePressed() {
   } else if (blockPlacingMode) { // BLOCK PLACING MODE (end)
     
     snapMouseToGrid(false);
-    if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(false)) {
-      placingBlock = false;
-      TerrainBlocks[blockBeingPlaced].place = true;
+    TerrainBlocks[blockBeingPlaced].CalculateTempPosSize();
+    if (TerrainBlocks[blockBeingPlaced].xSize > 0 && TerrainBlocks[blockBeingPlaced].ySize > 0) {
+      if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(false)) {
+        placingBlock = false;
+        TerrainBlocks[blockBeingPlaced].place = true;
+      }
     }
     
   } else if (blockMovingMode) { // BLOCK MOVING MODE
@@ -94,6 +99,26 @@ public void mouseMoved() {
 
 public void keyPressed() {
   
+  // CHARACTER KEYBINDS
+  if (key == 'p') {
+    gameState = 1;
+  }
+
+  if (key == ' ' && !player.jumping) {
+
+    player.jumping = true;
+    player.Vel.y = -10;
+    player.Pos.y -= 1;
+  } 
+  if (key == 'd') {
+    player.movingRight = true;
+  }
+  if (key == 'a') {
+    player.movingLeft = true;
+  }
+  
+  
+  // TERRAIN KEYBINDS
   if (key == CODED) {
     
     if (keyCode == RIGHT && !placingBlock) {
@@ -127,6 +152,19 @@ public void keyPressed() {
 
 public void keyReleased() {
   
+  // CHARACTER KEYBINDS
+  if (key == 'a') {
+    player.movingLeft = false; 
+    player.Vel.x = 0;
+  }
+
+  if (key == 'd') {
+    player.movingRight = false; 
+    player.Vel.x = 0;
+  }
+  
+  
+  // TERRAIN KEYBINDS
   if (key == CODED) {
     
     if (keyCode == RIGHT) {
