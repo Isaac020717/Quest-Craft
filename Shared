@@ -52,21 +52,52 @@ public void mousePressed() {
       }
     }
     
+  } else if (flagPlacingMode && !clickingButton) { // FLAG PLACING MODE
+    
+    // if there are no collisions then place the flag
+    snapMouseToGrid(false);
+    Flags[flagBeingPlaced].CalculatePosition();
+    if (!Flags[flagBeingPlaced].CheckPlacementCollisions(false)) {
+      placingFlag = false;
+      Flags[flagBeingPlaced].place = true;
+      flagPlacingMode = false;
+      placingFlag = false;
+      for (Button b : ConstructionButtons) {
+        if (b.selected == true) {
+          b.UnClick();
+        }
+      }
+    }
+    
   } else if (blockMovingMode) { // BLOCK MOVING MODE
     
-    if (!clickingButton && !movingBlock) {
+    if (!clickingButton && !movingBlock && !movingFlag) {
       blockBeingPlaced = checkTerrainSelection( int(mouseX), int(mouseY) );
       if (blockBeingPlaced != 1000) {
         TerrainBlocks[blockBeingPlaced].moving = true;
         TerrainBlocks[blockBeingPlaced].placed = false;
         movingBlock = true;
       }
-    } else if (!clickingButton && movingBlock) {
+      flagBeingPlaced = checkOtherSelection( int(mouseX), int(mouseY) );
+      if (flagBeingPlaced != 1000) {
+        Flags[flagBeingPlaced].moving = true;
+        Flags[flagBeingPlaced].placed = false;
+        movingFlag = true;
+      }
+    } else if (!clickingButton && (movingBlock || movingFlag)) {
       
-      snapMouseToGrid(true);
-      if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(true)) {
-        TerrainBlocks[blockBeingPlaced].place = true;
-        movingBlock = false;
+      if (movingBlock) {
+        snapMouseToGrid(true);
+        if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(true)) {
+          TerrainBlocks[blockBeingPlaced].place = true;
+          movingBlock = false;
+        }
+      } else if (movingFlag) {
+        snapMouseToGrid(false);
+        if (!Flags[flagBeingPlaced].CheckPlacementCollisions(true)) {
+          Flags[flagBeingPlaced].place = true;
+          movingFlag = false;
+        }
       }
       
     }
@@ -77,12 +108,105 @@ public void mousePressed() {
       int blockToDelete = checkTerrainSelection( int(mouseX), int(mouseY) );
       if (blockToDelete != 1000) {
         TerrainBlocks[blockToDelete] = null;
+      } else {
+        blockToDelete = checkOtherSelection( int(mouseX), int(mouseY) );
+        if (blockToDelete != 1000) {
+          for (Button b : ConstructionButtons) {
+            if ( (b.ButtonName == "EndFlag" && Flags[blockToDelete].type == "end") || (b.ButtonName == "StartFlag" && Flags[blockToDelete].type == "start") ) {
+              b.fade = false;
+            }
+          }
+          Flags[blockToDelete] = null;
+        }
       }
     }
     
   }
-  
+
+
+
+  //quit
+  if (gameState == 2) {
+    if (mouseX > 20 && mouseX < 163) {
+      if (mouseY > 20 && mouseY < 78) {
+        gamequit = true;
+      }
+    }
+  }
+
+  //play
+  if (gameState == 1) {
+    if (mouseX > 20 && mouseX < 163) {
+      if (mouseY > 20 && mouseY < 78) {
+        gameplay = true;
+        timeSinceGo = millis();
+        timeSinceGo -= time;
+      }
+    }
+  }
+
+
+  ///// Game State Buttons
+
+  if (gameState == 0) {
+
+    if (mouseX > 280 && mouseX < 402) {
+      if (mouseY > 164 && mouseY < 194) {
+        gameState = 1;
+      }
+    }
+  }
+
+  if (gameState == 1) {
+
+    if (mouseX > 520 && mouseX < 580) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 1;
+      }
+    }
+
+    if (mouseX > 610 && mouseX < 670) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 2;
+      }
+    }
+
+    if (mouseX > 700 && mouseX < 760) {
+      if (mouseY > 40 && mouseY < 88) {
+        backgroundChosen = 3;
+      }
+    }
+  }
+
+  if (gameState == 3) {
+    l = 1;
+    if (mouseX > 580 && mouseX < 800) {/////////////////////////////play again
+      if (mouseY > 480 && mouseY < 520) {
+        gameState = 2;
+        player.Pos.x = startX;
+        player.Pos.y = startY;
+        player.Vel.y = 0;
+        constructionMode = true;
+        blockPlacingMode = false;
+      }
+    }
+
+    if (mouseX > 200 && mouseX < 300) { //////////////////////////////reset
+      if (mouseY > 670 && mouseY < 700) {
+        for (int i = 0; i < TerrainBlocks.length; i ++) {
+          TerrainBlocks[i] = null;
+        }
+        gameState = 0;
+        player.Pos.x = startX;
+        player.Pos.y = startY;
+        player.Vel.y = 0;
+        constructionMode = true;
+        blockPlacingMode = false;
+      }
+    }
+  }
 }
+
 
 
 // Mouse Released Function
