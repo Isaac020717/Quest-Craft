@@ -5,6 +5,7 @@ import java.awt.AWTException;
 import java.awt.Robot;
 Robot MouseMover;
 
+// screen/offset variables
 int currentOffset = 0;
 int offsetIncr = 5;
 boolean positiveOffset, negativeOffset;
@@ -13,12 +14,28 @@ int screenY = 1600;
 int startX = 600;
 int startY = 400;
 
-int gameState = 0; // 0 = construction, 1 = playing, 2 = death
+// game state variables
+int gameState = 0; // 0 = start screen, 1 = editing, 2 = playing, 3 = game over
+int l = 1;
+boolean gameplay = false;
+boolean gamequit = false;
+String endtext;
+
+// scoring variables
+int time;
+int timeSinceGo;
+int temp_score;
+int score;
+String[] strscore = new String[1];
+String[] highscore = new String[1];
 
 
 
 // Setup Function
 public void setup() {
+  
+  time = millis();
+  highscore = loadStrings("scores.txt");
   
   // basic setup
   fullScreen(P2D);
@@ -28,6 +45,9 @@ public void setup() {
   
   // load images
   loadMaterials();
+  loadOther();
+  // load screens
+  loadScreens();
   // load character
   setUpCharacter();
   
@@ -48,38 +68,9 @@ public void draw() {
   
   background(250);
   applyOffset();
-  
-  if (gameState == 0) {
-    if (constructionMode) {
-      drawGrid();
-      displayTerrain();
-      displayConstructionUI();
-      highlights();
-    }
-  } else if (gameState == 1) {
-    text(player.Pos.x, player.Pos.x, 30);
-    text(currentOffset, player.Pos.x, 60);
-    displayTerrain();
-    player.collisionDetection();
-    playerMovement();
-    player.pan();
-    if (keyPressed){
-     if (key == 'q'){
-      gameState = 0;
-     }
-    }
-  }
+  displayScreen();
+  highlights();
   popMatrix();
-  
-  
-  // Press 'p' to start
-  if (blockPlacingMode){
-    if (keyPressed){
-      if (key == 'p'){
-       blockPlacingMode = false; 
-      }
-    }
-  }
   
 }
 
