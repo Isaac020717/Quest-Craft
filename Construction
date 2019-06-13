@@ -2,6 +2,7 @@
 
 // VARIABLES //
 TerrainBlock[] TerrainBlocks = new TerrainBlock[100];
+Flag[] Flags = new Flag[2];
 
 // Global Terrain Variables
 boolean constructionMode = true; // Only true for now!! Change Later!
@@ -260,6 +261,142 @@ class TerrainBlock {
 }
 
 
+/////////////////// FLAGS /////////////////////////////////////////
+
+
+// Flag Variables
+boolean flagPlacingMode = false;
+  boolean placingFlag = false;
+  boolean movingFlag = false;
+int flagBeingPlaced = 0;
+
+// Flag Images
+PImage startFlag, endFlag;
+
+
+class Flag {
+  
+  int xPos;
+  int yPos;
+  int xSize;
+  int ySize;
+  
+  int cols = 4; int rows = 2;
+  int[][] corners = new int[cols][rows];
+  
+  boolean placing = true;
+  boolean place = false;
+  boolean placed = false;
+  boolean moving = false;
+  
+  String type;
+  
+  
+  Flag(int x, int y, String t) {
+    xPos = x;
+    yPos = y;
+    type = t;
+  }
+  
+  
+  // Block Placing Function
+  void placeFlag() {
+    
+    if (place) {
+      
+      place = false;
+      placing = false;
+      placed = true;
+      
+      for (Button b : ConstructionButtons) {
+        if ( (b.ButtonName == "EndFlag" && type == "end") || (b.ButtonName == "StartFlag" && type == "start") ) {
+          b.fade = true;
+        }
+      }
+      
+      if (!moving) {
+        
+        // calculate all positions for collisions and placement
+        CalculatePosition();
+        
+      } else {
+        
+        // calculate all positions for collisions and placement
+        CalculatePosition();
+        
+        // reset variable
+        moving = false;
+        
+      }
+      
+    }
+    
+    if (placing || moving) {
+      imageMode(CENTER);
+      if (type == "start") {
+        image(startFlag, mouseX-currentOffset, mouseY);
+      } else if (type == "end") {
+        image(endFlag, mouseX-currentOffset, mouseY);
+      }
+    } else if (placed) {
+      imageMode(CENTER);
+      if (type == "start") {
+        image(startFlag, xPos, yPos);
+      } else if (type == "end") {
+        image(endFlag, xPos, yPos);
+      }
+    }
+    
+  }
+  
+  
+  // Function To Check For Collisions Between Block And Other Blocks
+  boolean CheckPlacementCollisions(boolean adjust) {
+    
+    boolean returnValue = false;
+    
+    if (adjust) {
+      // calculate all positions for collisions and placement
+      CalculatePosition();
+    }
+    
+    for (int i = 0; i < TerrainBlocks.length; i++) {
+      if (TerrainBlocks[i] != null) {
+        if ( (abs(TerrainBlocks[i].xPos - xPos) < ((TerrainBlocks[i].xSize/2) + (xSize/2)) ) && (abs(TerrainBlocks[i].yPos - yPos) < ((TerrainBlocks[i].ySize/2) + (ySize/2)) ) ) {
+          returnValue = true;
+        }
+      }
+    }
+    for (int i = 0; i < Flags.length; i++) {
+      if (Flags[i] != this && Flags[i] != null) {
+        if ( (abs(Flags[i].xPos - xPos) < ((Flags[i].xSize/2) + (xSize/2)) ) && (abs(Flags[i].yPos - yPos) < ((Flags[i].ySize/2) + (ySize/2)) ) ) {
+          returnValue = true;
+        }
+      }
+    }
+    
+    return returnValue;
+    
+  }
+  
+  
+  // Function For Setting Position Variables
+  void CalculatePosition() {
+    xPos = mouseX + currentOffset;
+    yPos = mouseY;
+    if (type == "start") {
+      xSize = startFlag.width;
+      ySize = startFlag.height;
+    } else if (type == "end") {
+      xSize = endFlag.width;
+      ySize = endFlag.height;
+    }
+  }
+  
+}
+
+
+
 
 // FUNCTIONS //
 
@@ -272,6 +409,11 @@ public void loadMaterials() {
   grassTexture.resize(gridSpacing, gridSpacing);
   lavaTexture = loadImage("lavaTexture.jpg");
   lavaTexture.resize(gridSpacing, gridSpacing);
+}
+// Function For Loading Other Image Files
+public void loadOther() {
+  startFlag = loadImage("GFlag(2).png");
+  endFlag = loadImage("RFlag(2).png");
 }
 
 
@@ -383,6 +525,14 @@ public void displayTerrain() {
     }
   }
 }
+// When Called This Function Displays All Flags
+public void displayFlags() {
+  for (int i = 0; i < Flags.length; i++) {
+    if (Flags[i] != null) {
+      Flags[i].placeFlag();
+    }
+  }
+}
 
 
 // Function That Returns The Type of Block You Click On 
@@ -408,7 +558,7 @@ public String checkTerrainCollisions(int xValue, int yValue) {
 }
 
 
-// Function That Returns The Type of Block You Click On 
+// Function That Returns The Index of The Block You Click On 
 public int checkTerrainSelection(int xValue, int yValue) {
   int returnValue = 1000;
   
@@ -418,6 +568,27 @@ public int checkTerrainSelection(int xValue, int yValue) {
       if (TerrainBlocks[i].placed) {
         if ( (xValue >= (TerrainBlocks[i].corners[0][0]+currentOffset)) && (xValue <= (TerrainBlocks[i].corners[2][0]+currentOffset)) ) {
           if ( (yValue <= TerrainBlocks[i].corners[0][1]) && (yValue >= TerrainBlocks[i].corners[2][1]) ) {
+            // we have a collision 
+            returnValue = i;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  return returnValue;
+}
+// Function That Returns The Index of The Non-Terrain Object You Click On 
+public int checkOtherSelection(int xValue, int yValue) {
+  int returnValue = 1000;
+  
+  // Check For Collision With A Flag of Any Other Non-Terrain Object
+  for (int i = 0; i < Flags.length; i++) {
+    if (Flags[i] != null) {
+      if (Flags[i].placed) {
+        if ( (xValue >= (Flags[i].xPos-(Flags[i].xSize/2)+currentOffset)) && (xValue <= (Flags[i].xPos+(Flags[i].xSize/2)+currentOffset)) ) {
+          if ( (yValue <= ( Flags[i].yPos+(Flags[i].ySize/2) )) && (yValue >= ( Flags[i].yPos-(Flags[i].ySize/2) )) ) {
             // we have a collision 
             returnValue = i;
             break;
