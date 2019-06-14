@@ -382,7 +382,7 @@ class Flag {
   
   // Function For Setting Position Variables
   void CalculatePosition() {
-    xPos = mouseX + currentOffset;
+    xPos = mouseX - currentOffset;
     yPos = mouseY;
     if (type == "start") {
       xSize = startFlag.width;
