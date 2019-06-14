@@ -5,23 +5,19 @@ import java.awt.AWTException;
 import java.awt.Robot;
 Robot MouseMover;
 
-// screen/offset variables
 int currentOffset = 0;
-int offsetIncr = 5;
+int offsetIncr = 4;
 boolean positiveOffset, negativeOffset;
 int screenX = 2000;
 int screenY = 1600;
 int startX = 600;
 int startY = 400;
 
-// game state variables
-int gameState = 0; // 0 = start screen, 1 = editing, 2 = playing, 3 = game over
-int l = 1;
-boolean gameplay = false;
+
 boolean gamequit = false;
+boolean gameplay = false;
 String endtext;
 
-// scoring variables
 int time;
 int timeSinceGo;
 int temp_score;
@@ -29,64 +25,97 @@ int score;
 String[] strscore = new String[1];
 String[] highscore = new String[1];
 
+int l = 1;
+
+int gameState = 0; // 0 = construction, 1 = playing, 2 = death
 
 
 // Setup Function
 public void setup() {
-  
   time = millis();
   highscore = loadStrings("scores.txt");
-  
-  // basic setup
+  //////////////////////////////////////////////////Player Setup
+  background(255, 255, 255);
+  noFill();
+  front1 = loadImage("FrontFacingPlayer.png");
+  front2 = loadImage("FrontFacingPlayer(2).png");
+  right1 = loadImage("RightFacingPlayer1.png");
+  right2 = loadImage("RightFacingPlayer2.png");
+  right3 = loadImage("RightFacingPlayer3.png");
+  right4 = loadImage("RightFacingPlayer4.png");
+  left1 = loadImage("LeftFacingPlayer1.png");
+  left2 = loadImage("LeftFacingPlayer2.png");
+  left3 = loadImage("LeftFacingPlayer3.png");
+  left4 = loadImage("LeftFacingPlayer4.png");
+  jump1 = loadImage("PlayerJump1.png");
+  jump2 = loadImage("PlayerJump2.png");
+
+  rightsequence[0] = right1;
+  rightsequence[1] = right2;
+  rightsequence[2] = right3;
+  rightsequence[3] = right4;
+
+  leftsequence[0] = left1;
+  leftsequence[1] = left2;
+  leftsequence[2] = left3;
+  leftsequence[3] = left4;
+
+  player.Pos = new PVector(startX, startY);
+  player.Vel = new PVector(0, 0);
+  player.Acc = new PVector(0, 0);
+
+  player.Acc.set(0, 0.5);
+
+  for (int i = 0; i < 4; i++) {
+    rightsequence[i].resize(59, 75);
+    leftsequence[i].resize(59, 75);
+  }
+
+  jump1.resize(59, 67);
+  jump2.resize(59, 75);
+
+
+  //////////////////basic setup//////////////////////////////////
   fullScreen(P2D);
   frameRate(60);
-  
+
   // setup variables
-  
+
   // load images
   loadMaterials();
-  loadOther();
-  // load screens
   loadScreens();
-  // load character
-  setUpCharacter();
-  
+  loadFireworks();
+  loadOther();
   // setup mouse mover
   try {
     MouseMover = new Robot();
-  } catch (AWTException e) {
+  } 
+  catch (AWTException e) {
     println("Robot Class Not Supported");
     exit();
   }
-  
 }
-
-
-
-// Draw Function
-public void draw() {
-  
-  background(250);
-  applyOffset();
-  displayScreen();
-  highlights();
-  popMatrix();
-  
-}
-
 
 
 // function for applying offset when user pans left and right
 void applyOffset() {
-  
+
   if (positiveOffset) {
     currentOffset += offsetIncr;
   }
   if (negativeOffset) {
     currentOffset -= offsetIncr;
   }
-  
+
   pushMatrix();
   translate(currentOffset, 0);
-  
+}
+
+// Draw Function
+public void draw() {
+  //println(gameState);
+  background(250);
+  applyOffset();
+  displayScreen();
+  popMatrix();
 }
