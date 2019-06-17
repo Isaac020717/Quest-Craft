@@ -1,7 +1,7 @@
 PImage startS;
 PImage endS;
 
-PImage quitB, playB, createB, end1, resetB, PAB, loadB;
+PImage quitB, playB, createB, end1, resetB, PAB, loadB, loadBP, saveB;
 int backgroundChosen;
 
 Fireworks fw1 = new Fireworks();
@@ -14,6 +14,10 @@ public void loadScreens() {
   quitB.resize(143, 52);
   playB = loadImage("playbutton.png");
   playB.resize(143, 52);
+  loadBP = loadImage("loadButtonPlaying.png");
+  loadBP.resize(143, 52);
+  saveB = loadImage("saveButton.png");
+  saveB.resize(143, 52);
   createB = loadImage("createButton.png");
   createB.resize(200, 85);
   loadB = loadImage("loadButton.png");
@@ -34,18 +38,10 @@ public void displayScreen() {
     imageMode(CENTER);
     image(startS, width/2, height/2);
     image(createB, width/2, 400);
-    image(loadB, width/2, 500);
-
 
     if (mouseX > width/2 - 100 && mouseX < width/2 + 100) {
       if (mouseY > 360 && mouseY < 440) {
         image(createB, width/2, 400, 230, 100);
-      }
-    }
-
-    if (mouseX > width/2 - 100 && mouseX < width/2 + 100) {
-      if (mouseY > 460 && mouseY < 540) {
-        image(loadB, width/2, 500, 230, 100);
       }
     }
   }
@@ -56,10 +52,24 @@ public void displayScreen() {
 
   if (gameState == 1) {
 
+    if (load) {
+      textSize(64);
+      fill(142, 154, 255);
+      text("Choose Level 1-6 With Your Keyboard", width/2 - 550, height/2);
+      if (keyPressed) {
+        if (key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6') {
+          levelnum = int(key) - 48;
+          levelname = levelnum + ".txt";
+          //println(levelname);
+          gameState = 1;
+          load();
+        }
+      }
+    }
     if (saving) {
       textSize(32);
-      fill(0,0,0);
-      text("Press 1-6 On Your Keyboard To Save Level", width-800, 100);
+      fill(0, 0, 0);
+      text("Press 1-6 On Your Keyboard To Save Level", width-900, 140);
       if (keyPressed) {
         if (key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6') {
           levelnum = int(key) - 48;
@@ -93,12 +103,26 @@ public void displayScreen() {
       if (!blockPlacingMode) {
         imageMode(CENTER);
         image(playB, 91 - currentOffset, 46);
+        image(loadBP, (width - 160) - currentOffset, 80);
+        image(saveB, (width - 160) - currentOffset, 180);
         if (mouseX > 20 && mouseX < 163) {
           if (mouseY > 20 && mouseY < 78) {
             //quitB.resize(154, 56);
             image(playB, 91 - currentOffset, 46, 154, 56);
           }
         }
+        if(mouseX > width - 230 && mouseX < width - 90 ){
+         if(mouseY > 58 && mouseY < 108){
+          image(loadBP, (width - 160) - currentOffset, 80, 154, 56);
+         }
+        }
+        
+        if(mouseX > width - 230 && mouseX < width - 90){
+          if(mouseY > 130 && mouseY < 210){
+           image(saveB, (width - 160) - currentOffset, 180, 154, 56); 
+          }
+        }
+        
       }
       if (keyPressed) {
         if (key == 'p') {
@@ -203,8 +227,5 @@ public void displayScreen() {
 
   if (gameState == 4) {
     background(122, 255, 231);
-    textSize(64);
-    fill(142, 154, 255);
-    text("Choose Level 1-6 With Your Keyboard", width/2 - 550, height/2);
   }
 }
