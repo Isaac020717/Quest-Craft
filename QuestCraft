@@ -9,23 +9,36 @@ int currentOffset = 0;
 int offsetIncr = 4;
 boolean positiveOffset, negativeOffset;
 int screenX = 2000;
-int screenY = 800;
+int screenY = 1600;
 int startX = 600;
 int startY = 400;
 
+
+boolean gamequit = false;
+boolean gameplay = false;
 boolean saving = false;
+boolean load = false;
 String endtext;
 int levelnum;
 String levelname;
 
-boolean keyrel = false;
+int time;
+int timeSinceGo;
+int temp_score;
+int score;
+String[] strscore = new String[1];
+String[] highscore = new String[1];
 
-int gameState = 0; // 0 = construction, 1 = playing, 2 = death
+
+int l = 1;
+
+int gameState = 0; // 0 = start, 1 = construction, 2 = playing, 3 = end, 4 = loading
 
 
 // Setup Function
 public void setup() {
-  
+  time = millis();
+  highscore = loadStrings("scores.txt");
   //////////////////////////////////////////////////Player Setup
   background(255, 255, 255);
   noFill();
@@ -65,21 +78,24 @@ public void setup() {
 
   jump1.resize(59, 67);
   jump2.resize(59, 75);
-  
-  
+
+
   //////////////////basic setup//////////////////////////////////
   fullScreen(P2D);
   frameRate(60);
-  
+
   // setup variables
-  
+
   // load images
   loadMaterials();
-  
+  loadScreens();
+  loadFireworks();
+  loadOther();
   // setup mouse mover
   try {
     MouseMover = new Robot();
-  } catch (AWTException e) {
+  } 
+  catch (AWTException e) {
     println("Robot Class Not Supported");
     exit();
   }
@@ -88,53 +104,23 @@ public void setup() {
 
 // function for applying offset when user pans left and right
 void applyOffset() {
-  
+
   if (positiveOffset) {
     currentOffset += offsetIncr;
   }
   if (negativeOffset) {
     currentOffset -= offsetIncr;
   }
-  
+
   pushMatrix();
   translate(currentOffset, 0);
-  
 }
 
 // Draw Function
 public void draw() {
-
+  //println(gameState);
   background(250);
   applyOffset();
-  
-  if (gameState == 0) {
-    if (constructionMode) {
-      drawGrid();
-      displayTerrain();
-      displayConstructionUI();
-    }
-  }
-  /////////////////////////////////////to start press p
-if (blockPlacingMode){
-  if (keyPressed){
-    if (key == 'p'){
-     blockPlacingMode = false; 
-    }
-  }
-}
-  if (gameState == 1) {
-    text(player.Pos.x, player.Pos.x, 30);
-    text(currentOffset, player.Pos.x, 60);
-    //drawGrid();
-    displayTerrain();
-    player.collisionDetection();
-    playerMovement();
-    player.pan();
-    if (keyPressed){
-     if (key == 'q'){
-      gameState = 0; 
-     }
-    }
-  }
+  displayScreen();
   popMatrix();
 }
