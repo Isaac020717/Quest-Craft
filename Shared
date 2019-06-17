@@ -129,6 +129,18 @@ public void mousePressed() {
 
   //play
   if (gameState == 1) {
+    
+    if(mouseX > width - 230 && mouseX < width - 90 ){
+         if(mouseY > 58 && mouseY < 108){
+          load = true;
+         }
+        }
+        
+        if(mouseX > width - 230 && mouseX < width - 90){
+          if(mouseY > 130 && mouseY < 210){
+           saving = true;
+          }
+        }
     if (mouseX > 20 && mouseX < 163) {
       if (mouseY > 20 && mouseY < 78) {
 
@@ -163,11 +175,7 @@ public void mousePressed() {
         gameState = 1;
       }
     }
-    if (mouseX > width/2 - 100 && mouseX < width/2 + 100) {
-      if (mouseY > 460 && mouseY < 540) {
-        gameState = 4;
-      }
-    }
+    
   }
 
   if (gameState == 1) {
@@ -232,22 +240,6 @@ public void mouseMoved() {
 public void keyPressed() {
 
   if (gameState == 1) {
-    if (key == 's') {
-      saving = true;
-    }
-    if (key == 'l') {
-      load();
-    }
-  }
-
-  if (gameState == 4) {
-    if (key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6') {
-      levelnum = int(key) - 48;
-      levelname = levelnum + ".txt";
-      //println(levelname);
-      load();
-      gameState = 1;
-    }
   }
 
   if (key == 'p') {
