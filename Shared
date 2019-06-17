@@ -1,5 +1,6 @@
 // This File Contains All Functions That Are Shared Between All Files
 
+boolean keyrel = false;
 
 
 // Mouse Pressed Function
@@ -22,7 +23,6 @@ public void mousePressed() {
       }
     }
   }
-
 
   if (blockPlacingMode && !placingBlock) { // BLOCK PLACING MODE (start)
 
@@ -50,31 +50,73 @@ public void mousePressed() {
         TerrainBlocks[blockBeingPlaced].place = true;
       }
     }
+  } else if (flagPlacingMode && !clickingButton) { // FLAG PLACING MODE
+
+    // if there are no collisions then place the flag
+    snapMouseToGrid(false);
+    Flags[flagBeingPlaced].CalculatePosition();
+    if (!Flags[flagBeingPlaced].CheckPlacementCollisions(false)) {
+      placingFlag = false;
+      Flags[flagBeingPlaced].place = true;
+      flagPlacingMode = false;
+      placingFlag = false;
+      for (Button b : ConstructionButtons) {
+        if (b.selected == true) {
+          b.UnClick();
+        }
+      }
+    }
   } else if (blockMovingMode) { // BLOCK MOVING MODE
 
-    if (!clickingButton && !movingBlock) {
+    if (!clickingButton && !movingBlock && !movingFlag) {
       blockBeingPlaced = checkTerrainSelection( int(mouseX), int(mouseY) );
       if (blockBeingPlaced != 1000) {
         TerrainBlocks[blockBeingPlaced].moving = true;
         TerrainBlocks[blockBeingPlaced].placed = false;
         movingBlock = true;
       }
-    } else if (!clickingButton && movingBlock) {
+      flagBeingPlaced = checkOtherSelection( int(mouseX), int(mouseY) );
+      if (flagBeingPlaced != 1000) {
+        Flags[flagBeingPlaced].moving = true;
+        Flags[flagBeingPlaced].placed = false;
+        movingFlag = true;
+      }
+    } else if (!clickingButton && (movingBlock || movingFlag)) {
 
-      snapMouseToGrid(true);
-      TerrainBlocks[blockBeingPlaced].place = true;
-      movingBlock = false;
-    } 
+      if (movingBlock) {
+        snapMouseToGrid(true);
+        if (!TerrainBlocks[blockBeingPlaced].CheckPlacementCollisions(true)) {
+          TerrainBlocks[blockBeingPlaced].place = true;
+          movingBlock = false;
+        }
+      } else if (movingFlag) {
+        snapMouseToGrid(false);
+        if (!Flags[flagBeingPlaced].CheckPlacementCollisions(true)) {
+          Flags[flagBeingPlaced].place = true;
+          movingFlag = false;
+        }
+      }
+    }
   } else if (blockDeletingMode) { // BLOCK DELETING MODE
-    
+
     if (!clickingButton) {
       int blockToDelete = checkTerrainSelection( int(mouseX), int(mouseY) );
       if (blockToDelete != 1000) {
         TerrainBlocks[blockToDelete] = null;
+      } else {
+        blockToDelete = checkOtherSelection( int(mouseX), int(mouseY) );
+        if (blockToDelete != 1000) {
+          for (Button b : ConstructionButtons) {
+            if ( (b.ButtonName == "EndFlag" && Flags[blockToDelete].type == "end") || (b.ButtonName == "StartFlag" && Flags[blockToDelete].type == "start") ) {
+              b.fade = false;
+            }
+          }
+          Flags[blockToDelete] = null;
+        }
       }
     }
-    
   }
+
 
   //quit
   if (gameState == 2) {
@@ -89,9 +131,23 @@ public void mousePressed() {
   if (gameState == 1) {
     if (mouseX > 20 && mouseX < 163) {
       if (mouseY > 20 && mouseY < 78) {
-        gameplay = true;
-        timeSinceGo = millis();
-        timeSinceGo -= time;
+
+        for (int i = 0; i < Flags.length; i++) {
+          if (Flags[i] != null) {
+            if (Flags[i].placed) {
+              if (Flags[i].type == "start") {
+                if (Flags[i].xPos < width/2) {
+                  currentOffset = Flags[i].xPos;
+                } else {
+                  currentOffset = -1 * Flags[i].xPos;
+                }
+                gameplay = true;
+                timeSinceGo = millis();
+                timeSinceGo -= time;
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -101,51 +157,55 @@ public void mousePressed() {
 
   if (gameState == 0) {
 
-    if (mouseX > 280 && mouseX < 402) {
-      if (mouseY > 164 && mouseY < 194) {
+    if (mouseX > width/2 - 100 && mouseX < width/2 + 100) {
+      if (mouseY > 315 && mouseY < 485) {
+        currentOffset = 0;
         gameState = 1;
+      }
+    }
+    if (mouseX > width/2 - 100 && mouseX < width/2 + 100) {
+      if (mouseY > 460 && mouseY < 540) {
+        gameState = 4;
       }
     }
   }
 
   if (gameState == 1) {
-
-    if (mouseX > 520 && mouseX < 580) {
-      if (mouseY > 40 && mouseY < 88) {
-        backgroundChosen = 1;
-      }
-    }
-
-    if (mouseX > 610 && mouseX < 670) {
-      if (mouseY > 40 && mouseY < 88) {
-        backgroundChosen = 2;
-      }
-    }
-
-    if (mouseX > 700 && mouseX < 760) {
-      if (mouseY > 40 && mouseY < 88) {
-        backgroundChosen = 3;
-      }
-    }
   }
 
   if (gameState == 3) {
     l = 1;
-    if (mouseX > 580 && mouseX < 800) {/////////////////////////////play again
-      if (mouseY > 480 && mouseY < 520) {
+    if (mouseX > width/2 - 182 && mouseX < width/2 + 182) {////////////////////play again
+      if (mouseY > 750 - 80 && mouseY < 750 + 80) {
         gameState = 2;
-        player.Pos.x = startX;
-        player.Pos.y = startY;
         player.Vel.y = 0;
         constructionMode = true;
         blockPlacingMode = false;
+
+
+        for (int i = 0; i < Flags.length; i++) {
+          if (Flags[i] != null) {
+            if (Flags[i].placed) {
+              if (Flags[i].type == "start") {
+                player.Pos.x = Flags[i].xPos - 30;
+                player.Pos.y = Flags[i].yPos - 90;
+              }
+            }
+          }
+        }
       }
     }
 
-    if (mouseX > 200 && mouseX < 300) { //////////////////////////////reset
-      if (mouseY > 670 && mouseY < 700) {
+    if (mouseX > width/2 - 182 && mouseX < width/2 + 182) {/////////////////////reset
+      if (mouseY > 400 - 80 && mouseY < 400 + 80) {
+
+        currentOffset = 0;
         for (int i = 0; i < TerrainBlocks.length; i ++) {
           TerrainBlocks[i] = null;
+        }
+
+        for (int i = 0; i < Flags.length; i++) {
+          Flags[i] = null;
         }
         gameState = 0;
         player.Pos.x = startX;
@@ -170,6 +230,25 @@ public void mouseMoved() {
 
 
 public void keyPressed() {
+
+  if (gameState == 1) {
+    if (key == 's') {
+      saving = true;
+    }
+    if (key == 'l') {
+      load();
+    }
+  }
+
+  if (gameState == 4) {
+    if (key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6') {
+      levelnum = int(key) - 48;
+      levelname = levelnum + ".txt";
+      //println(levelname);
+      load();
+      gameState = 1;
+    }
+  }
 
   if (key == 'p') {
     gameState = 1;
@@ -202,6 +281,13 @@ public void keyPressed() {
 
       if (constructionMode) {
         positiveOffset = true;
+      }
+    }
+    if (keyCode == SHIFT) {
+      for (Button b : ConstructionButtons) {
+        if (b.selected == true) {
+          b.UnClick();
+        }
       }
     }
   } else if (key == ENTER) {
