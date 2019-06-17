@@ -25,6 +25,11 @@ void savelevel() {
 }
 
 void load() {
+  load = false;
+  for(int i = 0; i < TerrainBlocks.length; i++){
+   TerrainBlocks[i] = null; 
+  }
+  
   String[] lines = loadStrings(levelname);
   Flags[0] = new Flag(int(lines[0]), int(lines[1]), "start");
   Flags[0].xSize = startFlag.width;
@@ -48,6 +53,7 @@ void load() {
 
   for (int i = 0; i < lines.length; i++) {
     if (lines[i].equals("dirt")) {
+
       for (int j = 0; j < TerrainBlocks.length; j++) {
 
         if (TerrainBlocks[j] == null) {
